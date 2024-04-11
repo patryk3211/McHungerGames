@@ -13,6 +13,11 @@ import java.util.Map;
 import static fi.iki.elonen.NanoHTTPD.Response.Status;
 
 public class Frontend extends IntegratedWebServer.Route {
+    // Testowy komentarz w pliku
+
+
+
+
     // Klasa pomocnicza zwracająca strumień pliku i jego typ
     private static class FileResult {
         public final InputStream stream;

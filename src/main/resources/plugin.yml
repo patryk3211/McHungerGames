@@ -1,0 +1,4 @@
+name: HungerGamesPlugin
+version: '${version}'
+main: org.patryk3211.hungergames.HungerGamesPlugin
+api-version: '1.20'

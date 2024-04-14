@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8" />
+    <title>Minecraft Hunger Games</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <script src="/js/login.js" type="module"></script>
+</head>
+<body>
+    <header class="w3-container w3-teal w3-margin-bottom">
+        <h2>Logowanie</h2>
+    </header>
+    <main class="w3-container">
+        <form class="w3-container w3-auto w3-card" id="loginform">
+            <header class="w3-text-dark-grey">
+                <h3>Logowanie</h3>
+            </header>
+            <p>
+                <input type="text" name="username" class="w3-input" id="loginform-username">
+                <label class="label w3-text-grey" for="loginform-username">Nazwa użytkownika</label>
+            </p>
+            <p>
+                <input type="password" name="password" class="w3-input" id="loginform-password">
+                <label class="label w3-text-grey" for="loginform-password">Hasło</label>
+            </p>
+            <p>
+                <input type="submit" class="w3-button w3-teal w3-margin-right" value="Zaloguj">
+                <span class="w3-text-red w3-cell-middle" id="loginform-error"></span>
+            </p>
+        </form>
+    </main>
+</body>
+</html>

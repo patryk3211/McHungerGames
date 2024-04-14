@@ -5,6 +5,11 @@ import org.patryk3211.hungergames.http.IntegratedWebServer;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.chrono.ChronoPeriod;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAmount;
 
 public final class HungerGamesPlugin extends JavaPlugin {
     public static Logger LOG;
@@ -18,7 +23,7 @@ public final class HungerGamesPlugin extends JavaPlugin {
         Configuration.init(getConfig());
 
         // Stwórz serwer HTTP
-        webServer = new IntegratedWebServer(Configuration.getHttpPort(), LOG);
+        webServer = new IntegratedWebServer(Configuration.getHttpPort(), Configuration.getHttpSessionTimeout() * 60, LOG);
 
         // Uruchom serwer HTTP
         try {

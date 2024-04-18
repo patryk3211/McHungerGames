@@ -15,7 +15,8 @@ public final class HungerGamesPlugin extends JavaPlugin {
         LOG = getSLF4JLogger();
 
         // Konfiguracja jest ładowana jak najszybciej, aby reszta klas miała do niej dostęp
-        Configuration.init(getConfig());
+        Configuration.init(getConfig(), getDataFolder());
+        saveConfig();
 
         // Stwórz serwer HTTP
         webServer = new IntegratedWebServer(Configuration.getHttpPort(), Configuration.getHttpSessionTimeout() * 60L, LOG);

@@ -1,5 +1,7 @@
 package org.patryk3211.hungergames;
 
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.patryk3211.hungergames.map.MapConfig;
 
@@ -18,14 +20,19 @@ public class Configuration {
     private static final String HTTP_PASSWORD_PATH = "password";
     private static final String HTTP_SESSION_TIMEOUT = "session_timeout";
 
+    private static final String PLAYER_SPAWN = "spawn_location";
+    private static final String PVP_DELAY = "pvp_delay";
+
     private static final List<MapConfig> maps = new ArrayList<>();
 
-    public static void init(FileConfiguration config, File data) {
+    public static void init(FileConfiguration config, File data, World overworld) {
         // Definicja domyślnych wartości konfiguracji
         config.addDefault(HTTP_PORT_PATH, 25580);
         config.addDefault(HTTP_USER_PATH, "admin");
         config.addDefault(HTTP_PASSWORD_PATH, "1");
         config.addDefault(HTTP_SESSION_TIMEOUT, 30);
+        config.addDefault(PLAYER_SPAWN, new Location(overworld, 0, 0, 0));
+        config.addDefault(PVP_DELAY, 15);
 
         configuration = config;
         dataDirectory = data;
@@ -42,7 +49,7 @@ public class Configuration {
             for(File map : files) {
                 if (map.isFile()) {
                     MapConfig mapConf = new MapConfig(map);
-                    if (!mapConf.process()) {
+                    if (!mapConf.process(overworld)) {
                         HungerGamesPlugin.LOG.error("Error while processing map file '" + map.getName() + "'");
                     } else {
                         maps.add(mapConf);
@@ -71,5 +78,17 @@ public class Configuration {
 
     public static int getHttpSessionTimeout() {
         return configuration.getInt(HTTP_SESSION_TIMEOUT);
+    }
+
+    public static Location getSpawnLocation() {
+        return configuration.getLocation(PLAYER_SPAWN);
+    }
+
+    public static List<MapConfig> getMaps() {
+        return maps;
+    }
+
+    public static int getPvpDelay() {
+        return configuration.getInt(PVP_DELAY);
     }
 }

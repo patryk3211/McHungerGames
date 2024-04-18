@@ -4,13 +4,13 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.BoundingBox;
 import org.patryk3211.hungergames.HungerGamesPlugin;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,37 +20,45 @@ public class MapConfig {
     private static final String MAP_BB_END = "bounding_box.end";
     private static final String MAP_SPAWN_LOCATIONS = "spawn_locations";
     private static final String MAP_CENTER = "center";
+
     private final FileConfiguration file;
     private String name;
     private Location startPos;
     private Location endPos;
+    private BoundingBox boundingBox;
     private Location center;
     private final List<Location> spawnLocations = new ArrayList<>();
+
+    private MapChests chests;
 
     public MapConfig(File file) {
         this.file = YamlConfiguration.loadConfiguration(file);
         this.name = file.getName();
     }
 
-    public boolean process() {
+    public boolean process(World overworld) {
         List<Integer> startPosList = this.file.getIntegerList(MAP_BB_START);
         if (startPosList.size() != 3) {
             HungerGamesPlugin.LOG.error(MAP_BB_START + " has an invalid length");
             return false;
         }
         this.startPos = new Location(null, startPosList.get(0), startPosList.get(1), startPosList.get(2));
+
         List<Integer> endPosList = this.file.getIntegerList(MAP_BB_END);
         if (endPosList.size() != 3) {
             HungerGamesPlugin.LOG.error(MAP_BB_END + " has an invalid length");
             return false;
         }
         this.endPos = new Location(null, endPosList.get(0), endPosList.get(1), endPosList.get(2));
+        this.boundingBox = new BoundingBox(startPos.x(), startPos.y(), startPos.z(), endPos.x(), endPos.y(), endPos.z());
+
         List<Integer> centerList = this.file.getIntegerList(MAP_CENTER);
         if (centerList.size() != 3) {
             HungerGamesPlugin.LOG.error(MAP_CENTER + " has an invalid length");
             return false;
         }
         this.center = new Location(null, centerList.get(0), centerList.get(1), centerList.get(2));
+
         int centerX = this.center.getBlockX();
         int centerZ = this.center.getBlockZ();
         String confName = this.file.getString(MAP_NAME);
@@ -95,9 +103,43 @@ public class MapConfig {
         HungerGamesPlugin.LOG.info("Loaded map '" + this.name + "', dimensions (" + diff.getBlockX() + ", " + diff.getBlockY() + ", " + diff.getBlockZ() + ") with spawn locations:");
         int index = 0;
         for(final Location loc : this.spawnLocations) {
+            loc.setWorld(overworld);
             HungerGamesPlugin.LOG.info((++index) + ": x = " + loc.getBlockX() + ", y = " + loc.getBlockY() + ", z = " + loc.getBlockZ() + ", angle = " + loc.getYaw());
         }
 
         return true;
+    }
+
+    public BukkitRunnable findChests(World world) {
+        return new BukkitRunnable() {
+            @Override
+            public void run() {
+                chests = new MapChests(MapConfig.this, world);
+            }
+        };
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Location getStartPos() {
+        return startPos;
+    }
+
+    public Location getEndPos() {
+        return endPos;
+    }
+
+    public Location getCenter() {
+        return center;
+    }
+
+    public boolean isInMap(Location location) {
+        return boundingBox.contains(location.x(), location.y(), location.z());
+    }
+
+    public List<Location> getSpawnLocations() {
+        return spawnLocations;
     }
 }

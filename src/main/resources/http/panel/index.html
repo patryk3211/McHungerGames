@@ -11,11 +11,75 @@
         <h2>Panel sterowania</h2>
     </header>
     <main class="w3-container">
-        <section class="w3-container w3-auto w3-card w3-margin-bottom">
-            <header class="w3-text-dark-grey">
-                <h2>Lista graczy</h2>
-            </header>
-        </section>
+        <div class="w3-row">
+            <div class="w3-third">
+                <section class="w3-margin w3-container w3-card">
+                    <header class="w3-container w3-border-bottom w3-border-teal w3-text-dark-grey w3-padding-small w3-margin-bottom">
+                        <h2 class="margin-0">Status</h2>
+                    </header>
+                    <div class="w3-row flex gap flex-center w3-margin-bottom">
+                        <div class="fit w3-center">
+                            <div class="w3-border-bottom w3-xxlarge w3-container w3-text-dark-grey" id="gametimer">
+                                00:00
+                            </div>
+                            <label class="w3-small w3-cell-top w3-text-grey">Pozostały czas gry</label>
+                        </div>
+                        <div class="fit w3-center">
+                            <div class="w3-border-bottom w3-xxlarge w3-container w3-text-dark-grey" id="playerleftcount">
+                                2
+                            </div>
+                            <label class="w3-small w3-cell-top w3-text-grey">Pozostało graczy</label>
+                        </div>
+                        <div class="fit w3-center">
+                            <div class="w3-border-bottom w3-xxlarge w3-container w3-text-dark-grey" id="playertotalcount">
+                                5
+                            </div>
+                            <label class="w3-small w3-cell-top w3-text-grey">Graczy online</label>
+                        </div>
+                    </div>
+                    <div class="w3-row flex gap flex-center w3-margin-bottom">
+                        <button class="w3-button w3-green">Rozpocznij</button>
+                    </div>
+                </section>
+            </div>
+            <div class="w3-third">
+                <section class="w3-margin w3-container w3-card">
+                    <header class="w3-container w3-border-bottom w3-border-teal w3-text-dark-grey w3-padding-small w3-margin-bottom">
+                        <h2 class="margin-0">Log</h2>
+                    </header>
+                </section>
+            </div>
+            <div class="w3-third">
+                <section class="w3-margin w3-container w3-card">
+                    <header class="w3-container w3-border-bottom w3-border-teal w3-text-dark-grey w3-padding-small w3-margin-bottom">
+                        <h2 class="margin-0">Lista graczy</h2>
+                    </header>
+                    <table class="w3-table w3-bordered rows-middle" id="playertable">
+                        <thead>
+                            <tr>
+                                <th>Nazwa gracza</th>
+                                <th>Status</th>
+                                <th>Akcje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="name">patryk3211</td>
+                                <td class="status">Żyje</td>
+                                <td class="actions"><button class="w3-button w3-red">Wyrzuć</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <template id="playertable-entry">
+                        <tr>
+                            <td class="name">Nazwa Gracza</td>
+                            <td class="status">Status Gracza</td>
+                            <td class="actions"><button class="w3-button w3-red">Wyrzuć</button></td>
+                        </tr>
+                    </template>
+                </section>
+            </div>
+        </div>
     </main>
 </body>
 </html>

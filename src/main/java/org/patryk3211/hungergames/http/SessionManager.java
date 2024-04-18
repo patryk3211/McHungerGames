@@ -1,7 +1,6 @@
 package org.patryk3211.hungergames.http;
 
 import java.time.Instant;
-import java.time.temporal.TemporalAmount;
 import java.util.*;
 
 public class SessionManager {

@@ -1,6 +1,5 @@
 package org.patryk3211.hungergames.http;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;

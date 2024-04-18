@@ -4,7 +4,8 @@ import java.io.IOException;
 
 public class RunHttpFrontend {
     public static void main(String[] args) throws IOException {
-        IntegratedWebServer server = new IntegratedWebServer(8080);
+        IntegratedWebServer server = new IntegratedWebServer(8080, 60 * 30);
+        server.getSessionManager().addCredentials("admin", "1");
 
         server.start();
 

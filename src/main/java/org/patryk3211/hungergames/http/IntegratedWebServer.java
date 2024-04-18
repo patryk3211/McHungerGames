@@ -1,41 +1,46 @@
 package org.patryk3211.hungergames.http;
 
 import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
-import org.patryk3211.hungergames.HungerGamesPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.LoggerFactoryFriend;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Type;
 import java.util.Map;
 
 public class IntegratedWebServer extends RouterNanoHTTPD {
     private static IntegratedWebServer instance = null;
     private final Logger LOG;
 
-    public IntegratedWebServer(int port) {
-        this(port, LoggerFactory.getLogger(IntegratedWebServer.class));
+    private final SessionManager sessionManager;
+
+    public IntegratedWebServer(int port, long sessionTimeout) {
+        this(port, sessionTimeout, LoggerFactory.getLogger(IntegratedWebServer.class));
     }
 
-    public IntegratedWebServer(int port, Logger logger) {
+    public IntegratedWebServer(int port, long sessionTimeout, Logger logger) {
         super(port);
         this.LOG = logger;
         addMappings();
 
+        sessionManager = new SessionManager(sessionTimeout);
         instance = this;
     }
 
     @Override
     public void addMappings() {
+        // Domyślne odpowiedzi
         setNotImplementedHandler(NotImplementedHandler.class);
         setNotFoundHandler(Error404UriHandler.class);
-//        addRoute("/", Frontend.class);
+
+        // Metody API
+        addRoute("/api/check", SessionCheck.class);
+        addRoute("/api/auth", SessionAuth.class);
+
+        // Inne odpowiedzi na zapytania będą odczytywane z plików
         addRoute("/.*", Frontend.class);
     }
 
@@ -45,6 +50,10 @@ public class IntegratedWebServer extends RouterNanoHTTPD {
 
     public Logger getLogger() {
         return LOG;
+    }
+
+    public SessionManager getSessionManager() {
+        return sessionManager;
     }
 
     @Override
@@ -81,15 +90,75 @@ public class IntegratedWebServer extends RouterNanoHTTPD {
         }
     }
 
+    public static class ApiRouteException extends Exception {
+        public final Response.IStatus responseCode;
+        public final String message;
+        public final String contentType;
+
+        public ApiRouteException(String message) {
+            this.responseCode = Response.Status.BAD_REQUEST;
+            this.message = message;
+            this.contentType = "application/json";
+        }
+
+        public ApiRouteException(Response.IStatus status, String message, String contentType) {
+            this.responseCode = status;
+            this.message = message;
+            this.contentType = contentType;
+        }
+    }
+
     // Ta klasa ułatwia korzystanie z danych przesyłanych w formacie JSON wczytując je do obiektu
     public static abstract class JsonRoute extends Route {
-        protected abstract Response handle(UriResource uriResource, JsonObject json, IHTTPSession ihttpSession);
+        public static String getJsonString(JsonObject object, String fieldName) throws ApiRouteException {
+            try {
+                JsonElement element = object.get(fieldName);
+                if(element == null)
+                    throw new ApiRouteException("{\"msg\":\"Field '" + fieldName + "' is missing\"}");
+                return element.getAsString();
+            } catch (UnsupportedOperationException | IllegalStateException e) {
+                throw new ApiRouteException("{\"msg\":\"Field '" + fieldName + "' has an invalid type\"}");
+            }
+        }
+
+        protected abstract Response handle(UriResource uriResource, JsonObject json, IHTTPSession ihttpSession) throws ApiRouteException;
 
         @Override
         public Response post(UriResource uriResource, Map<String, String> map, IHTTPSession ihttpSession) {
+            // Sprawdzamy czy otrzymaliśmy odpowiedni format danych
+            String contentTypeHeader = ihttpSession.getHeaders().get("content-type");
+            if(contentTypeHeader == null) {
+                return newFixedLengthResponse(
+                        Response.Status.BAD_REQUEST,
+                        "application/json",
+                        "{\"msg\":\"Invalid content type specified\"}"
+                );
+            }
+            ContentType contentType = new ContentType(contentTypeHeader);
+            if(!contentType.getContentType().equals("application/json")) {
+                return newFixedLengthResponse(
+                        Response.Status.BAD_REQUEST,
+                        "application/json",
+                        "{\"msg\":\"Invalid content type specified\"}"
+                );
+            }
+            // Odczytujemy otrzymane dane
             JsonReader reader = new JsonReader(new InputStreamReader(ihttpSession.getInputStream()));
             JsonObject root = new Gson().fromJson(reader, JsonObject.class);
-            return handle(uriResource, root, ihttpSession);
+            if(root == null) {
+                return newFixedLengthResponse(
+                        Response.Status.BAD_REQUEST,
+                        "application/json",
+                        "{\"msg\":\"Malformed JSON received\"}"
+                );
+            }
+
+            try {
+                // Uruchamiamy metodę z odczytanymi danymi
+                return handle(uriResource, root, ihttpSession);
+            } catch (ApiRouteException e) {
+                return newFixedLengthResponse(e.responseCode, e.contentType, e.message);
+            }
         }
     }
 }

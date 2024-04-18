@@ -18,7 +18,9 @@ public final class HungerGamesPlugin extends JavaPlugin {
         Configuration.init(getConfig());
 
         // Stwórz serwer HTTP
-        webServer = new IntegratedWebServer(Configuration.getHttpPort(), LOG);
+        webServer = new IntegratedWebServer(Configuration.getHttpPort(), Configuration.getHttpSessionTimeout() * 60L, LOG);
+        // Dodaj dane logowania z pliku konfiguracyjnego
+        webServer.getSessionManager().addCredentials(Configuration.getHttpUser(), Configuration.getHttpPassword());
 
         // Uruchom serwer HTTP
         try {
@@ -33,6 +35,7 @@ public final class HungerGamesPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         // Zatrzymaj serwer HTTP
-        webServer.stop();
+        if(webServer != null)
+            webServer.stop();
     }
 }

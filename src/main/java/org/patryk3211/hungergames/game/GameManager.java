@@ -40,10 +40,13 @@ public class GameManager implements Listener {
     }
 
     public void nextState(GameState state) {
-        if(currentState != state) {
+        while(state.isMetaState)
+            state = state.targetState;
+        final GameState actualState = state;
+        if(currentState != actualState) {
             // Dodajemy akcję zmiany stanu do kolejki
             actionQueue.add(() -> {
-                currentState = state;
+                currentState = actualState;
                 currentState.stateManager.setManager(this);
                 currentState.stateManager.onEntry();
             });

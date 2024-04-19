@@ -16,11 +16,24 @@ public enum GameState {
     // Odliczanie do startu gry
     StartCountdown(new StartCountdownState()),
     // Gra się toczy
-    Playing(null);
+    Playing((GameStateHandler) null),
 
+    // Pseudo stan do sygnalizowania początku gry
+    StartGame(PickMap);
+
+    public final boolean isMetaState;
+    public final GameState targetState;
     public final GameStateHandler stateManager;
 
     GameState(GameStateHandler stateManager) {
         this.stateManager = stateManager;
+        this.isMetaState = false;
+        this.targetState = null;
+    }
+
+    GameState(GameState target) {
+        this.stateManager = null;
+        this.isMetaState = true;
+        this.targetState = target;
     }
 }

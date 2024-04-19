@@ -3,6 +3,7 @@ package org.patryk3211.hungergames.http;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import fi.iki.elonen.NanoHTTPD;
+import fi.iki.elonen.NanoWSD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ public class IntegratedWebServer extends RouterNanoHTTPD {
     private final Logger LOG;
 
     private final SessionManager sessionManager;
+    private final NanoWSD wsRoute = new WebSocketRoute(-1);
 
     public IntegratedWebServer(int port, long sessionTimeout) {
         this(port, sessionTimeout, LoggerFactory.getLogger(IntegratedWebServer.class));
@@ -41,7 +43,14 @@ public class IntegratedWebServer extends RouterNanoHTTPD {
         addRoute("/api/auth", SessionAuth.class);
 
         // Inne odpowiedzi na zapytania będą odczytywane z plików
-        addRoute("/.*", Frontend.class);
+        addRoute(".*", Frontend.class);
+    }
+
+    @Override
+    public Response serve(IHTTPSession session) {
+        if(session.getUri().equals("/api/ws"))
+            return this.wsRoute.serve(session);
+        return super.serve(session);
     }
 
     public static IntegratedWebServer get() {

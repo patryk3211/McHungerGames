@@ -19,6 +19,7 @@ repositories {
 
 configurations {
     shade
+    implementation.extendsFrom(shade)
     compile.extendsFrom(shade)
 }
 
@@ -26,6 +27,7 @@ dependencies {
     compileOnly "io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT"
 
     shade "org.nanohttpd:nanohttpd-nanolets:2.3.1"
+    shade "org.nanohttpd:nanohttpd-websocket:2.3.1"
 }
 
 task httpRun(type: JavaExec) {

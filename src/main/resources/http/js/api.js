@@ -16,4 +16,10 @@ function session_id() {
     return sessionStorage.getItem(SESSION_ID_KEY);
 }
 
+var WEBSOCKET = null;
+function start_websocket() {
+    WEBSOCKET = new WebSocket("/api/ws");
+//    WEBSOCKET.sendg
+}
+
 export { call_api, session_id, SESSION_ID_KEY };

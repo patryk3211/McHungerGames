@@ -64,7 +64,7 @@ public class Frontend extends IntegratedWebServer.Route {
             // Prosta ścieżka, przekierowujemy do index.html w folderze
             filename = realUri + "/index.html";
         }
-        result = getFile("http/" + filename);
+        result = getFile(filename.charAt(0) == '/' ? "http" + filename : "http/" + filename);
         if(result == null) {
             // Plik nie został otwarty więc pewnie nie istnieje
             IntegratedWebServer.get().getLogger().warn("Requested file '" + filename + "' not found in http directory");

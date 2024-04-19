@@ -3,6 +3,7 @@ package org.patryk3211.hungergames;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.Plugin;
 import org.patryk3211.hungergames.map.MapConfig;
 
 import java.io.File;
@@ -25,7 +26,10 @@ public class Configuration {
 
     private static final List<MapConfig> maps = new ArrayList<>();
 
-    public static void init(FileConfiguration config, File data, World overworld) {
+    public static void init(Plugin plugin) {
+        FileConfiguration config = plugin.getConfig();
+        World overworld = plugin.getServer().getWorlds().get(0);
+
         // Definicja domyślnych wartości konfiguracji
         config.addDefault(HTTP_PORT_PATH, 25580);
         config.addDefault(HTTP_USER_PATH, "admin");
@@ -33,9 +37,10 @@ public class Configuration {
         config.addDefault(HTTP_SESSION_TIMEOUT, 30);
         config.addDefault(PLAYER_SPAWN, new Location(overworld, 0, 0, 0));
         config.addDefault(PVP_DELAY, 15);
+        plugin.saveConfig();
 
         configuration = config;
-        dataDirectory = data;
+        dataDirectory = plugin.getDataFolder();
 
         maps.clear();
         File mapsFolder = new File(Path.of(dataDirectory.getPath(), "maps").toUri());
@@ -52,6 +57,7 @@ public class Configuration {
                     if (!mapConf.process(overworld)) {
                         HungerGamesPlugin.LOG.error("Error while processing map file '" + map.getName() + "'");
                     } else {
+                        mapConf.findChests(overworld);
                         maps.add(mapConf);
                     }
                 }

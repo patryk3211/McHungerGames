@@ -4,7 +4,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;
 import org.patryk3211.hungergames.HungerGamesPlugin;
 
@@ -51,6 +50,13 @@ public class MapConfig {
         }
         this.endPos = new Location(null, endPosList.get(0), endPosList.get(1), endPosList.get(2));
         this.boundingBox = new BoundingBox(startPos.x(), startPos.y(), startPos.z(), endPos.x(), endPos.y(), endPos.z());
+
+        if(this.startPos.x() > this.endPos.x())
+            HungerGamesPlugin.LOG.warn("Map start position x coordinate bigger than end coordinate");
+        if(this.startPos.y() > this.endPos.y())
+            HungerGamesPlugin.LOG.warn("Map start position y coordinate bigger than end coordinate");
+        if(this.startPos.z() > this.endPos.z())
+            HungerGamesPlugin.LOG.warn("Map start position z coordinate bigger than end coordinate");
 
         List<Integer> centerList = this.file.getIntegerList(MAP_CENTER);
         if (centerList.size() != 3) {
@@ -99,7 +105,7 @@ public class MapConfig {
             return false;
         }
 
-        Location diff = this.endPos.subtract(this.startPos);
+        Location diff = this.endPos.clone().subtract(this.startPos);
         HungerGamesPlugin.LOG.info("Loaded map '" + this.name + "', dimensions (" + diff.getBlockX() + ", " + diff.getBlockY() + ", " + diff.getBlockZ() + ") with spawn locations:");
         int index = 0;
         for(final Location loc : this.spawnLocations) {
@@ -110,13 +116,8 @@ public class MapConfig {
         return true;
     }
 
-    public BukkitRunnable findChests(World world) {
-        return new BukkitRunnable() {
-            @Override
-            public void run() {
-                chests = new MapChests(MapConfig.this, world);
-            }
-        };
+    public void findChests(World world) {
+        chests = new MapChests(MapConfig.this, world);
     }
 
     public String getName() {

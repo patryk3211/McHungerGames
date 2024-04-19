@@ -2,6 +2,7 @@ package org.patryk3211.hungergames.http;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
+import org.patryk3211.hungergames.HungerGamesPlugin;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,9 +25,11 @@ public class Frontend extends IntegratedWebServer.Route {
         }
     }
 
-    private FileResult getFile(String filename) {
+    public static ClassLoader classLoader = Frontend.class.getClassLoader();
+
+    private static FileResult getFile(String filename) {
         // Trochę kodu z internetu do otwierania plików z archiwum JAR
-        URL url = this.getClass().getClassLoader().getResource(filename);
+        URL url = classLoader.getResource(filename);
         if (url == null) {
             return null;
         } else {

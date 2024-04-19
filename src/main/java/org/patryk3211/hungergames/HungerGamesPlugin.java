@@ -2,6 +2,7 @@ package org.patryk3211.hungergames;
 
 import org.bukkit.plugin.java.JavaPlugin;
 import org.patryk3211.hungergames.game.GameManager;
+import org.patryk3211.hungergames.http.Frontend;
 import org.patryk3211.hungergames.http.IntegratedWebServer;
 import org.slf4j.Logger;
 
@@ -16,6 +17,7 @@ public final class HungerGamesPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         LOG = getSLF4JLogger();
+        Frontend.classLoader = getClassLoader();
 
         // Konfiguracja jest ładowana jak najszybciej, aby reszta klas miała do niej dostęp
         Configuration.init(this);

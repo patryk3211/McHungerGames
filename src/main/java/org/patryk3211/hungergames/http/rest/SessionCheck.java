@@ -1,8 +1,9 @@
-package org.patryk3211.hungergames.http;
+package org.patryk3211.hungergames.http.rest;
 
 import com.google.gson.JsonObject;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
+import org.patryk3211.hungergames.http.IntegratedWebServer;
 
 import java.util.UUID;
 

@@ -3,19 +3,26 @@ package org.patryk3211.hungergames.http;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import fi.iki.elonen.NanoHTTPD;
+import fi.iki.elonen.NanoWSD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
+import org.patryk3211.hungergames.http.rest.KickPlayer;
+import org.patryk3211.hungergames.http.rest.SessionAuth;
+import org.patryk3211.hungergames.http.rest.SessionCheck;
+import org.patryk3211.hungergames.http.rest.StartGame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
+import java.util.UUID;
 
 public class IntegratedWebServer extends RouterNanoHTTPD {
     private static IntegratedWebServer instance = null;
     private final Logger LOG;
 
     private final SessionManager sessionManager;
+    private final NanoWSD wsRoute = new WebSocketRoute(-1);
 
     public IntegratedWebServer(int port, long sessionTimeout) {
         this(port, sessionTimeout, LoggerFactory.getLogger(IntegratedWebServer.class));
@@ -39,9 +46,18 @@ public class IntegratedWebServer extends RouterNanoHTTPD {
         // Metody API
         addRoute("/api/check", SessionCheck.class);
         addRoute("/api/auth", SessionAuth.class);
+        addRoute("/api/start", StartGame.class);
+        addRoute("/api/kick", KickPlayer.class);
 
         // Inne odpowiedzi na zapytania będą odczytywane z plików
-        addRoute("/.*", Frontend.class);
+        addRoute(".*", Frontend.class);
+    }
+
+    @Override
+    public Response serve(IHTTPSession session) {
+        if(session.getUri().equals("/api/ws"))
+            return this.wsRoute.serve(session);
+        return super.serve(session);
     }
 
     public static IntegratedWebServer get() {
@@ -58,7 +74,7 @@ public class IntegratedWebServer extends RouterNanoHTTPD {
 
     @Override
     public void start() throws IOException {
-        super.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
+        super.start(10 * 1000, false);
         LOG.info("Started integrated http server on: http://0.0.0.0:" + super.getListeningPort());
     }
 
@@ -96,9 +112,11 @@ public class IntegratedWebServer extends RouterNanoHTTPD {
         public final String contentType;
 
         public ApiRouteException(String message) {
-            this.responseCode = Response.Status.BAD_REQUEST;
-            this.message = message;
-            this.contentType = "application/json";
+            this(Response.Status.BAD_REQUEST, message, "application/json");
+        }
+
+        public ApiRouteException(Response.IStatus status, String message) {
+            this(status, message, "application/json");
         }
 
         public ApiRouteException(Response.IStatus status, String message, String contentType) {
@@ -110,6 +128,7 @@ public class IntegratedWebServer extends RouterNanoHTTPD {
 
     // Ta klasa ułatwia korzystanie z danych przesyłanych w formacie JSON wczytując je do obiektu
     public static abstract class JsonRoute extends Route {
+        // Funkcja pomocnicza wyciągająca pole w postaci napisu z podanych danych.
         public static String getJsonString(JsonObject object, String fieldName) throws ApiRouteException {
             try {
                 JsonElement element = object.get(fieldName);
@@ -118,6 +137,19 @@ public class IntegratedWebServer extends RouterNanoHTTPD {
                 return element.getAsString();
             } catch (UnsupportedOperationException | IllegalStateException e) {
                 throw new ApiRouteException("{\"msg\":\"Field '" + fieldName + "' has an invalid type\"}");
+            }
+        }
+
+        // Funkcja pomocnicza sprawdzająca czy podana sesja jest prawidłowa
+        public static void ensureSessionValid(JsonObject object) throws ApiRouteException {
+            String uuidStr = getJsonString(object, "sid");
+            try {
+                UUID sid = UUID.fromString(uuidStr);
+                boolean status = IntegratedWebServer.get().getSessionManager().isAuthorized(sid);
+                if(!status)
+                    throw new ApiRouteException("{\"msg\":\"Invalid session\"}");
+            } catch (IllegalArgumentException e) {
+                throw new ApiRouteException("{\"msg\":\"Field 'sid' has a malformed UUID\"}");
             }
         }
 

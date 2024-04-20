@@ -24,9 +24,11 @@ public class Frontend extends IntegratedWebServer.Route {
         }
     }
 
-    private FileResult getFile(String filename) {
+    public static ClassLoader classLoader = Frontend.class.getClassLoader();
+
+    private static FileResult getFile(String filename) {
         // Trochę kodu z internetu do otwierania plików z archiwum JAR
-        URL url = this.getClass().getClassLoader().getResource(filename);
+        URL url = classLoader.getResource(filename);
         if (url == null) {
             return null;
         } else {
@@ -61,7 +63,7 @@ public class Frontend extends IntegratedWebServer.Route {
             // Prosta ścieżka, przekierowujemy do index.html w folderze
             filename = realUri + "/index.html";
         }
-        result = getFile("http/" + filename);
+        result = getFile(filename.charAt(0) == '/' ? "http" + filename : "http/" + filename);
         if(result == null) {
             // Plik nie został otwarty więc pewnie nie istnieje
             IntegratedWebServer.get().getLogger().warn("Requested file '" + filename + "' not found in http directory");

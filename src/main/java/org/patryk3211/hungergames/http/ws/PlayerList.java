@@ -1,7 +1,6 @@
 package org.patryk3211.hungergames.http.ws;
 
 import com.google.gson.*;
-import com.google.gson.stream.JsonWriter;
 import fi.iki.elonen.NanoWSD;
 import org.patryk3211.hungergames.HungerGamesPlugin;
 import org.patryk3211.hungergames.game.GameManager;
@@ -9,8 +8,6 @@ import org.patryk3211.hungergames.game.TrackedPlayerData;
 import org.patryk3211.hungergames.http.WebSocketRoute;
 
 import java.io.IOException;
-import java.io.StringWriter;
-import java.lang.reflect.Type;
 import java.util.Collection;
 
 public class PlayerList implements WebSocketRoute.IWebSocketResponder {

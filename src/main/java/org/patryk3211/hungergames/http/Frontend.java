@@ -2,7 +2,6 @@ package org.patryk3211.hungergames.http;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
-import org.patryk3211.hungergames.HungerGamesPlugin;
 
 import java.io.IOException;
 import java.io.InputStream;

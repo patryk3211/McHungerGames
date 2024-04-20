@@ -30,14 +30,7 @@ public class Configuration {
         FileConfiguration config = plugin.getConfig();
         World overworld = plugin.getServer().getWorlds().get(0);
 
-        // Definicja domyślnych wartości konfiguracji
-//        config.addDefault(HTTP_PORT_PATH, 25580);
-//        config.addDefault(HTTP_USER_PATH, "admin");
-//        config.addDefault(HTTP_PASSWORD_PATH, "1");
-//        config.addDefault(HTTP_SESSION_TIMEOUT, 30);
-//        config.addDefault(PLAYER_SPAWN, new Location(overworld, 0, 0, 0));
-//        config.addDefault(PVP_DELAY, 15);
-//        plugin.saveConfig();
+        // Zapisuje plik z JAR do folderu plugins
         plugin.saveDefaultConfig();
 
         configuration = config;

@@ -5,14 +5,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fi.iki.elonen.NanoWSD;
 import org.jetbrains.annotations.Nullable;
-import org.patryk3211.hungergames.HungerGamesPlugin;
 import org.patryk3211.hungergames.http.ws.PlayerList;
 import org.patryk3211.hungergames.http.ws.Subscriptions;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 public class WebSocketRoute extends NanoWSD {

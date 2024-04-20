@@ -24,3 +24,17 @@
 .margin-0 {
     margin: 0 !important;
 }
+
+.margin-bottom-small {
+    margin-bottom: 4px;
+}
+
+.close {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    text-align: center;
+    border-radius: 12px;
+    margin-right: -8px;
+    cursor: pointer;
+}

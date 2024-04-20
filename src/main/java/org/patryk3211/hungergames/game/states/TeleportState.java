@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.patryk3211.hungergames.game.GameState;
 import org.patryk3211.hungergames.game.GameStateHandler;
+import org.patryk3211.hungergames.game.TrackedPlayerData;
 import org.patryk3211.hungergames.map.MapConfig;
 
 import java.util.Collections;
@@ -14,13 +15,14 @@ import java.util.List;
 public class TeleportState extends GameStateHandler {
     @Override
     public void onEntry() {
-        final List<Player> playerList = new LinkedList<>(manager.players());
+        final List<TrackedPlayerData> playerList = new LinkedList<>(manager.players());
         Collections.shuffle(playerList, manager.random);
+        manager.movementAllowed = false;
 
         final MapConfig map = manager.getCurrentMap();
         final Iterator<Location> spawns = map.getSpawnLocations().iterator();
         while(!playerList.isEmpty()) {
-            final Player player = playerList.remove(0);
+            final Player player = playerList.remove(0).playerInstance;
             final Location spawn = spawns.next();
             player.teleport(spawn);
         }

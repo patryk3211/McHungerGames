@@ -31,13 +31,14 @@ public class Configuration {
         World overworld = plugin.getServer().getWorlds().get(0);
 
         // Definicja domyślnych wartości konfiguracji
-        config.addDefault(HTTP_PORT_PATH, 25580);
-        config.addDefault(HTTP_USER_PATH, "admin");
-        config.addDefault(HTTP_PASSWORD_PATH, "1");
-        config.addDefault(HTTP_SESSION_TIMEOUT, 30);
-        config.addDefault(PLAYER_SPAWN, new Location(overworld, 0, 0, 0));
-        config.addDefault(PVP_DELAY, 15);
-        plugin.saveConfig();
+//        config.addDefault(HTTP_PORT_PATH, 25580);
+//        config.addDefault(HTTP_USER_PATH, "admin");
+//        config.addDefault(HTTP_PASSWORD_PATH, "1");
+//        config.addDefault(HTTP_SESSION_TIMEOUT, 30);
+//        config.addDefault(PLAYER_SPAWN, new Location(overworld, 0, 0, 0));
+//        config.addDefault(PVP_DELAY, 15);
+//        plugin.saveConfig();
+        plugin.saveDefaultConfig();
 
         configuration = config;
         dataDirectory = plugin.getDataFolder();
@@ -87,7 +88,10 @@ public class Configuration {
     }
 
     public static Location getSpawnLocation() {
-        return configuration.getLocation(PLAYER_SPAWN);
+        List<Float> floats = configuration.getFloatList(PLAYER_SPAWN);
+        if(floats.isEmpty())
+            return null;
+        return new Location(null, floats.get(0), floats.get(1), floats.get(2));
     }
 
     public static List<MapConfig> getMaps() {

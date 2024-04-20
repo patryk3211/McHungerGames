@@ -4,11 +4,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fi.iki.elonen.NanoWSD;
-import org.patryk3211.hungergames.http.ws.StartGameResponder;
+import org.jetbrains.annotations.Nullable;
+import org.patryk3211.hungergames.http.ws.Subscriptions;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class WebSocketRoute extends NanoWSD {
@@ -20,7 +22,7 @@ public class WebSocketRoute extends NanoWSD {
     }
 
     private void addResponders() {
-        addResponder("start_game", new StartGameResponder());
+        addResponder("subscribe", new Subscriptions());
     }
 
     private void addResponder(String type, IWebSocketResponder responder) {
@@ -33,7 +35,16 @@ public class WebSocketRoute extends NanoWSD {
     }
 
     public interface IWebSocketResponder {
-        String respond(JsonObject request);
+        void respond(JsonObject request, WebSocket socket) throws IOException;
+    }
+
+    public static @Nullable String getJsonString(JsonObject object, String field) {
+        try {
+            JsonElement el = object.get(field);
+            return el.getAsString();
+        } catch (UnsupportedOperationException | IllegalStateException e) {
+            return null;
+        }
     }
 
     public static String errorResponse(String msg) {
@@ -110,7 +121,7 @@ public class WebSocketRoute extends NanoWSD {
                         IWebSocketResponder responder = route.responderMap.get(typeStr);
                         if (responder == null)
                             throw new UnsupportedOperationException();
-                        send(responder.respond(root));
+                        responder.respond(root, this);
                     }
                 } catch(UnsupportedOperationException | IllegalStateException e) {
                     send(errorResponse("Invalid type parameter"));

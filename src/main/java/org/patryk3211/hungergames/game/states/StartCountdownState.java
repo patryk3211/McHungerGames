@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.Nullable;
+import org.patryk3211.hungergames.game.GameState;
 import org.patryk3211.hungergames.game.GameStateHandler;
 
 public class StartCountdownState extends GameStateHandler {
@@ -27,10 +28,9 @@ public class StartCountdownState extends GameStateHandler {
     public void tick() {
         if(tickCount++ == 20) {
             tickCount = 0;
-            if(timeLeft-- == 0) {
+            if(--timeLeft == 0) {
                 manager.server.sendMessage(Component.text("Start", WHITE));
-            } else {
-                manager.server.sendMessage(Component.text(timeLeft + "...", WHITE));
+                manager.nextState(GameState.Playing);
             }
         }
     }

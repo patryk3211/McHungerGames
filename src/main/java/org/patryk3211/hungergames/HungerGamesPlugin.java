@@ -11,6 +11,7 @@ import java.io.IOException;
 public final class HungerGamesPlugin extends JavaPlugin {
     public static Logger LOG;
     public static GameManager manager;
+    private static HungerGamesPlugin instance;
 
     private IntegratedWebServer webServer;
 
@@ -18,6 +19,7 @@ public final class HungerGamesPlugin extends JavaPlugin {
     public void onEnable() {
         LOG = getSLF4JLogger();
         Frontend.classLoader = getClassLoader();
+        instance = this;
 
         // Konfiguracja jest ładowana jak najszybciej, aby reszta klas miała do niej dostęp
         Configuration.init(this);
@@ -43,10 +45,16 @@ public final class HungerGamesPlugin extends JavaPlugin {
         }
     }
 
+    public static HungerGamesPlugin get() {
+        return instance;
+    }
+
     @Override
     public void onDisable() {
         // Zatrzymaj serwer HTTP
-        if(webServer != null)
+        if(webServer != null) {
+            LOG.info("Stopping the integrated http server");
             webServer.stop();
+        }
     }
 }

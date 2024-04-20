@@ -12,10 +12,14 @@ public class PlayingState extends GameStateHandler {
     private boolean shieldActive;
     private int shieldLeft;
 
+    private int timeTicks;
+
     @Override
     public void onEntry() {
         shieldActive = true;
         shieldLeft = Configuration.getPvpDelay() * 20;
+        manager.movementAllowed = true;
+        timeTicks = 0;
     }
 
     @Override
@@ -34,5 +38,12 @@ public class PlayingState extends GameStateHandler {
             }
             --shieldLeft;
         }
+
+        ++timeTicks;
+    }
+
+    // Ile sekund trwa już gra
+    public int gameTime() {
+        return timeTicks / 20;
     }
 }

@@ -35,20 +35,31 @@ public class MapConfig {
         this.name = file.getName();
     }
 
+    public double genericNumeric(List<?> list, int index) {
+        Object obj = list.get(index);
+        if(obj instanceof Double)
+            return (Double) obj;
+        if(obj instanceof Float)
+            return (Float) obj;
+        if(obj instanceof Integer)
+            return (Integer) obj;
+        return Double.NaN;
+    }
+
     public boolean process(World overworld) {
-        List<Integer> startPosList = this.file.getIntegerList(MAP_BB_START);
+        List<Float> startPosList = this.file.getFloatList(MAP_BB_START);
         if (startPosList.size() != 3) {
             HungerGamesPlugin.LOG.error(MAP_BB_START + " has an invalid length");
             return false;
         }
-        this.startPos = new Location(null, startPosList.get(0), startPosList.get(1), startPosList.get(2));
+        this.startPos = new Location(overworld, startPosList.get(0), startPosList.get(1), startPosList.get(2));
 
-        List<Integer> endPosList = this.file.getIntegerList(MAP_BB_END);
+        List<Float> endPosList = this.file.getFloatList(MAP_BB_END);
         if (endPosList.size() != 3) {
             HungerGamesPlugin.LOG.error(MAP_BB_END + " has an invalid length");
             return false;
         }
-        this.endPos = new Location(null, endPosList.get(0), endPosList.get(1), endPosList.get(2));
+        this.endPos = new Location(overworld, endPosList.get(0), endPosList.get(1), endPosList.get(2));
         this.boundingBox = new BoundingBox(startPos.x(), startPos.y(), startPos.z(), endPos.x(), endPos.y(), endPos.z());
 
         if(this.startPos.x() > this.endPos.x())
@@ -58,15 +69,15 @@ public class MapConfig {
         if(this.startPos.z() > this.endPos.z())
             HungerGamesPlugin.LOG.warn("Map start position z coordinate bigger than end coordinate");
 
-        List<Integer> centerList = this.file.getIntegerList(MAP_CENTER);
+        List<Float> centerList = this.file.getFloatList(MAP_CENTER);
         if (centerList.size() != 3) {
             HungerGamesPlugin.LOG.error(MAP_CENTER + " has an invalid length");
             return false;
         }
-        this.center = new Location(null, centerList.get(0), centerList.get(1), centerList.get(2));
+        this.center = new Location(overworld, centerList.get(0), centerList.get(1), centerList.get(2));
 
-        int centerX = this.center.getBlockX();
-        int centerZ = this.center.getBlockZ();
+        double centerX = this.center.x();
+        double centerZ = this.center.z();
         String confName = this.file.getString(MAP_NAME);
         if (confName == null) {
             HungerGamesPlugin.LOG.warn("Name not provided for map, using file name");
@@ -91,13 +102,13 @@ public class MapConfig {
                 return false;
             }
 
-            if (genericList.size() == 3 && genericList.get(0) instanceof Integer) {
-                int x = (Integer) genericList.get(0);
-                int y = (Integer) genericList.get(1);
-                int z = (Integer) genericList.get(2);
+            if (genericList.size() == 3) {
+                double x = genericNumeric(genericList, 0);
+                double y = genericNumeric(genericList, 1);
+                double z = genericNumeric(genericList, 2);
                 double yaw = Math.atan2(x - centerX, centerZ - z);
                 yaw = Math.toDegrees((yaw + Math.PI * 2) % (Math.PI * 2));
-                this.spawnLocations.add(new Location(null, x, y, z, (float) yaw, 0.0f));
+                this.spawnLocations.add(new Location(overworld, x, y, z, (float) yaw, 0.0f));
                 continue;
             }
 
@@ -109,7 +120,6 @@ public class MapConfig {
         HungerGamesPlugin.LOG.info("Loaded map '" + this.name + "', dimensions (" + diff.getBlockX() + ", " + diff.getBlockY() + ", " + diff.getBlockZ() + ") with spawn locations:");
         int index = 0;
         for(final Location loc : this.spawnLocations) {
-            loc.setWorld(overworld);
             HungerGamesPlugin.LOG.info((++index) + ": x = " + loc.getBlockX() + ", y = " + loc.getBlockY() + ", z = " + loc.getBlockZ() + ", angle = " + loc.getYaw());
         }
 

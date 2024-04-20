@@ -1,13 +1,20 @@
 package org.patryk3211.hungergames.game;
 
 import com.destroystokyo.paper.event.server.ServerTickStartEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
+import net.kyori.adventure.title.TitlePart;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.player.PlayerHarvestBlockEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.patryk3211.hungergames.Configuration;
 import org.patryk3211.hungergames.HungerGamesPlugin;
@@ -20,16 +27,20 @@ public class GameManager implements Listener {
     private MapConfig currentMap;
 
     private final Queue<Runnable> actionQueue = new LinkedList<>();
-    private final Set<Player> trackedPlayers = new HashSet<>();
+    private final Map<UUID, TrackedPlayerData> trackedPlayers = new HashMap<>();
     public final Random random;
     public final Server server;
 
+    public int actionBarTime = 0;
+
     public boolean pvpEnabled;
+    public boolean movementAllowed;
 
     public GameManager(Server server) {
         currentMap = null;
         random = new Random();
         pvpEnabled = false;
+        movementAllowed = true;
 
         this.server = server;
         nextState(GameState.Waiting);
@@ -60,6 +71,19 @@ public class GameManager implements Listener {
             action.run();
         }
 
+        // Pokaż tekst nad paskiem ekwipunku
+        if(++actionBarTime == 5) {
+            Component title = currentState.stateManager.getHotBarTitle();
+            if (title != null) {
+                for (TrackedPlayerData value : trackedPlayers.values()) {
+                    if (value.playerInstance == null)
+                        continue;
+                    value.playerInstance.sendActionBar(title);
+                }
+            }
+            actionBarTime = 0;
+        }
+
         // Uruchamia metode tick po wszystkich zmianach stanu
         currentState.stateManager.tick();
     }
@@ -80,8 +104,8 @@ public class GameManager implements Listener {
         actionQueue.add(action);
     }
 
-    public Collection<Player> players() {
-        return trackedPlayers;
+    public Collection<TrackedPlayerData> players() {
+        return trackedPlayers.values();
     }
 
     @EventHandler
@@ -91,13 +115,23 @@ public class GameManager implements Listener {
             // Tylko zwykli gracze są przenoszeni do odpowiednich miejsc
             if(currentState == GameState.Waiting || currentMap == null) {
                 // Tylko podczas oczekiwania gracze mogą dołączać do gry
-                player.teleport(Configuration.getSpawnLocation());
+                Location loc = Configuration.getSpawnLocation();
+                loc.setWorld(server.getWorlds().get(0));
+                player.teleport(loc);
                 player.setGameMode(GameMode.SURVIVAL);
                 player.getInventory().clear();
 
-                trackedPlayers.add(player);
+                trackedPlayers.compute(player.getUniqueId(), (key, value) -> {
+                    if(value == null) {
+                        return new TrackedPlayerData(player, player.getName());
+                    } else {
+                        value.playerInstance = player;
+                        return value;
+                    }
+                });
             } else {
                 // Przy dołączaniu podczas gry, gracz jest teleportowany do środka mapy jako obserwator
+                player.getInventory().clear();
                 player.setGameMode(GameMode.SPECTATOR);
                 player.teleport(currentMap.getCenter());
             }
@@ -107,10 +141,24 @@ public class GameManager implements Listener {
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        if(currentState == GameState.Waiting) {
-            trackedPlayers.remove(player);
-        } else {
-            // Gracz wyszedł podczas gry
+        if(!player.isOp()) {
+            if (currentState == GameState.Waiting) {
+                TrackedPlayerData data = trackedPlayers.get(player.getUniqueId());
+                if(data != null)
+                    data.playerInstance = null;
+            } else {
+                // Gracz wyszedł podczas gry
+            }
+        }
+    }
+
+    @EventHandler
+    public void onBlockBreak(BlockBreakEvent event) {
+        Player player = event.getPlayer();
+        if(!player.isOp()) {
+            // Zakazujemy niszczenia bloków dla zwykłych graczy
+            player.sendMessage("Nie możesz niszczyć bloków");
+            event.setCancelled(true);
         }
     }
 
@@ -118,6 +166,16 @@ public class GameManager implements Listener {
     public void onPlayerDamage(EntityDamageByEntityEvent event) {
         if(event.getDamager() instanceof Player && !pvpEnabled) {
             event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerMoved(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        if(!player.isOp()) {
+            if (!movementAllowed) {
+                event.setCancelled(true);
+            }
         }
     }
 

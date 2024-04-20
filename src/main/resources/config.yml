@@ -1,0 +1,15 @@
+# Ustawia port dla serwera HTTP do zarządzania grą
+http_port: 25580
+
+# Ustawia użytkownika oraz hasło logowania do interfejsu webowego
+user: 'admin'
+password: '1'
+
+# Ustawia czas wygaśnięcia sesji interfejsu webowego w sekundach
+session_timeout: 1800
+
+# Ustawia lokalizacje spawnu dla nowych graczy
+spawn_location: [1000.5,65,1000.5]
+
+# Ustawia czas ochrony przed walką od rozpoczęcia gry w sekundach
+pvp_delay: 15

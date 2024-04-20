@@ -1,9 +1,6 @@
 package org.patryk3211.hungergames.game;
 
-import org.patryk3211.hungergames.game.states.MapPickState;
-import org.patryk3211.hungergames.game.states.StartCountdownState;
-import org.patryk3211.hungergames.game.states.TeleportState;
-import org.patryk3211.hungergames.game.states.WaitState;
+import org.patryk3211.hungergames.game.states.*;
 
 public enum GameState {
     // W tym stanie gracze oczekują na start gry przez administratora
@@ -16,7 +13,7 @@ public enum GameState {
     // Odliczanie do startu gry
     StartCountdown(new StartCountdownState()),
     // Gra się toczy
-    Playing((GameStateHandler) null),
+    Playing(new PlayingState()),
 
     // Pseudo stan do sygnalizowania początku gry
     StartGame(PickMap);

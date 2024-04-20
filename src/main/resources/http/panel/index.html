@@ -38,7 +38,7 @@
                         </div>
                     </div>
                     <div class="w3-row flex gap flex-center w3-margin-bottom">
-                        <button class="w3-button w3-green">Rozpocznij</button>
+                        <button class="w3-button w3-green" data-apicall="start" data-success="Gra została rozpoczęta">Rozpocznij</button>
                     </div>
                 </section>
             </div>
@@ -63,24 +63,35 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td class="name">patryk3211</td>
-                                <td class="status">Żyje</td>
-                                <td class="actions"><button class="w3-button w3-red">Wyrzuć</button></td>
-                            </tr>
                         </tbody>
                     </table>
                     <template id="playertable-entry">
                         <tr>
-                            <td class="name">Nazwa Gracza</td>
-                            <td class="status">Status Gracza</td>
-                            <td class="actions"><button class="w3-button w3-red">Wyrzuć</button></td>
+                            <td class="name">@playername@</td>
+                            <td class="status">@playerstatus@</td>
+                            <td class="actions"><button class="w3-button w3-red" data-apicall="kick" data-apicall-player="@playername@">Wyrzuć</button></td>
                         </tr>
                     </template>
                 </section>
             </div>
         </div>
     </main>
+    <aside id="messagelist" class="w3-display-bottomright w3-container">
+        <ul class="w3-ul">
+        </ul>
+        <template class="item-error">
+            <li class="w3-pale-red w3-border w3-border-red w3-round-large margin-bottom-small">
+                <span class="msg">@msg</span>
+                <span class="close w3-hover-red">&times;</span>
+            </li>
+        </template>
+        <template class="item-success">
+            <li class="w3-pale-green w3-border w3-border-green w3-round-large margin-bottom-small">
+                <span class="msg">@msg</span>
+                <span class="close w3-hover-green">&times;</span>
+            </li>
+        </template>
+    </aside>
 </body>
 </html>
 

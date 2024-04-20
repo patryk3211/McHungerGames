@@ -3,6 +3,7 @@ package org.patryk3211.hungergames.http.ws;
 import com.google.gson.JsonObject;
 import fi.iki.elonen.NanoWSD;
 import org.patryk3211.hungergames.HungerGamesPlugin;
+import org.patryk3211.hungergames.game.TrackedPlayerData;
 import org.patryk3211.hungergames.http.WebSocketRoute;
 
 import java.io.IOException;
@@ -26,6 +27,8 @@ public class Subscriptions implements WebSocketRoute.IWebSocketResponder {
     }
 
     public void notify(String channel, String message) {
+        HungerGamesPlugin.LOG.info("Notify: " + message + "@" + channel);
+        HungerGamesPlugin.LOG.info(subscriptions.toString());
         final Set<NanoWSD.WebSocket> sockets = subscriptions.get(channel);
         if(sockets == null)
             return;
@@ -46,11 +49,25 @@ public class Subscriptions implements WebSocketRoute.IWebSocketResponder {
             return;
         }
 
-        final Set<NanoWSD.WebSocket> sockets = subscriptions.computeIfAbsent("channel", s -> new HashSet<>());
+        final Set<NanoWSD.WebSocket> sockets = subscriptions.computeIfAbsent(channel, s -> new HashSet<>());
         if(!sockets.add(socket)) {
             socket.send(errorResponse("Channel already subscribed"));
         } else {
             socket.send(successResponse("Subscribed to channel"));
         }
+    }
+
+    public static void notifyTracked(TrackedPlayerData data) {
+        instance.notify("tracked",
+        "{\"type\":\"tracked\"," +
+                "\"name\":\"" + data.name + "\"," +
+                "\"state\":\"" + data.getStatus().localizedName + "\"}");
+    }
+
+    public static void notifyCount(int online, int remaining) {
+        instance.notify("count",
+                "{\"type\":\"count\"," +
+                        "\"online\":" + online + "," +
+                        "\"remaining\":" + remaining + "}");
     }
 }

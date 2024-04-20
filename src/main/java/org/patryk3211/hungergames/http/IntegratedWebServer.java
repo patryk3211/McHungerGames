@@ -5,6 +5,7 @@ import com.google.gson.stream.JsonReader;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoWSD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
+import org.patryk3211.hungergames.http.rest.KickPlayer;
 import org.patryk3211.hungergames.http.rest.SessionAuth;
 import org.patryk3211.hungergames.http.rest.SessionCheck;
 import org.patryk3211.hungergames.http.rest.StartGame;
@@ -46,6 +47,7 @@ public class IntegratedWebServer extends RouterNanoHTTPD {
         addRoute("/api/check", SessionCheck.class);
         addRoute("/api/auth", SessionAuth.class);
         addRoute("/api/start", StartGame.class);
+        addRoute("/api/kick", KickPlayer.class);
 
         // Inne odpowiedzi na zapytania będą odczytywane z plików
         addRoute(".*", Frontend.class);
@@ -72,7 +74,7 @@ public class IntegratedWebServer extends RouterNanoHTTPD {
 
     @Override
     public void start() throws IOException {
-        super.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
+        super.start(10 * 1000, false);
         LOG.info("Started integrated http server on: http://0.0.0.0:" + super.getListeningPort());
     }
 

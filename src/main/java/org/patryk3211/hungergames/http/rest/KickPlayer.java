@@ -18,7 +18,7 @@ public class KickPlayer extends IntegratedWebServer.JsonRoute {
             throw new IntegratedWebServer.ApiRouteException(NanoHTTPD.Response.Status.NOT_FOUND, "{\"msg\":\"Gracz nieistnieje\"}");
         }
 
-        player.kick();
+        HungerGamesPlugin.manager.deferredAction(player::kick);
         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", "{\"status\":true}");
     }
 }

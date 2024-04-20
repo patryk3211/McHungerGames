@@ -18,6 +18,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.patryk3211.hungergames.Configuration;
 import org.patryk3211.hungergames.HungerGamesPlugin;
+import org.patryk3211.hungergames.http.ws.Subscriptions;
 import org.patryk3211.hungergames.map.MapConfig;
 
 import java.util.*;
@@ -30,6 +31,8 @@ public class GameManager implements Listener {
     private final Map<UUID, TrackedPlayerData> trackedPlayers = new HashMap<>();
     public final Random random;
     public final Server server;
+
+    public int onlineCount = 0;
 
     public int actionBarTime = 0;
 
@@ -108,6 +111,17 @@ public class GameManager implements Listener {
         return trackedPlayers.values();
     }
 
+    public int getRemainingPlayerCount() {
+        if(currentState == GameState.Waiting)
+            return onlineCount;
+        int remaining = 0;
+        for(TrackedPlayerData data : trackedPlayers.values()) {
+            if(data.getStatus() == PlayerStatus.Alive)
+                ++remaining;
+        }
+        return remaining;
+    }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
@@ -120,21 +134,23 @@ public class GameManager implements Listener {
                 player.teleport(loc);
                 player.setGameMode(GameMode.SURVIVAL);
                 player.getInventory().clear();
-
-                trackedPlayers.compute(player.getUniqueId(), (key, value) -> {
-                    if(value == null) {
-                        return new TrackedPlayerData(player, player.getName());
-                    } else {
-                        value.playerInstance = player;
-                        return value;
-                    }
-                });
             } else {
                 // Przy dołączaniu podczas gry, gracz jest teleportowany do środka mapy jako obserwator
                 player.getInventory().clear();
                 player.setGameMode(GameMode.SPECTATOR);
                 player.teleport(currentMap.getCenter());
             }
+            TrackedPlayerData data = trackedPlayers.compute(player.getUniqueId(), (key, value) -> {
+                if(value == null) {
+                    return new TrackedPlayerData(player, player.getName());
+                } else {
+                    value.playerInstance = player;
+                    return value;
+                }
+            });
+            ++onlineCount;
+            Subscriptions.notifyTracked(data);
+            Subscriptions.notifyCount(onlineCount, getRemainingPlayerCount());
         }
     }
 
@@ -144,11 +160,15 @@ public class GameManager implements Listener {
         if(!player.isOp()) {
             if (currentState == GameState.Waiting) {
                 TrackedPlayerData data = trackedPlayers.get(player.getUniqueId());
-                if(data != null)
+                if(data != null) {
                     data.playerInstance = null;
+                    Subscriptions.notifyTracked(data);
+                }
             } else {
                 // Gracz wyszedł podczas gry
             }
+            --onlineCount;
+            Subscriptions.notifyCount(onlineCount, getRemainingPlayerCount());
         }
     }
 

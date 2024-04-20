@@ -5,6 +5,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fi.iki.elonen.NanoWSD;
 import org.jetbrains.annotations.Nullable;
+import org.patryk3211.hungergames.HungerGamesPlugin;
+import org.patryk3211.hungergames.http.ws.PlayerList;
 import org.patryk3211.hungergames.http.ws.Subscriptions;
 
 import java.io.IOException;
@@ -23,6 +25,7 @@ public class WebSocketRoute extends NanoWSD {
 
     private void addResponders() {
         addResponder("subscribe", new Subscriptions());
+        addResponder("players", new PlayerList());
     }
 
     private void addResponder(String type, IWebSocketResponder responder) {
@@ -67,7 +70,7 @@ public class WebSocketRoute extends NanoWSD {
         private String auth(JsonObject json) {
             try {
                 // Sprawdzamy czy podana sesja jest prawidłowa
-                JsonElement sid = json.get("");
+                JsonElement sid = json.get("sid");
                 if(sid == null)
                     return errorResponse("Missing SID");
                 String sidStr = sid.getAsString();
@@ -113,6 +116,8 @@ public class WebSocketRoute extends NanoWSD {
                     String typeStr = type.getAsString();
                     if(typeStr.equals("auth")) {
                         send(auth(root));
+                    } else if(typeStr.equals("keep-alive")) {
+                        send("{\"type\":\"keep-alive\"}");
                     } else {
                         if(!authenticated) {
                             send(errorResponse("Not authenticated"));
@@ -133,12 +138,11 @@ public class WebSocketRoute extends NanoWSD {
 
         @Override
         protected void onPong(NanoWSD.WebSocketFrame webSocketFrame) {
-
         }
 
         @Override
         protected void onException(IOException e) {
-
+            e.printStackTrace();
         }
     }
 }

@@ -2,25 +2,32 @@ package org.patryk3211.hungergames.game;
 
 import com.destroystokyo.paper.event.server.ServerTickStartEvent;
 import net.kyori.adventure.text.Component;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Server;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextColor;
+import org.apache.commons.lang3.ObjectUtils;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 import org.patryk3211.hungergames.Configuration;
 import org.patryk3211.hungergames.HungerGamesPlugin;
+import org.patryk3211.hungergames.game.states.PlayingState;
 import org.patryk3211.hungergames.http.ws.Subscriptions;
 import org.patryk3211.hungergames.map.MapConfig;
 
 import java.util.*;
 
 public class GameManager implements Listener {
+    private static final Style WHITE = Style.style(TextColor.color(255, 255, 255));
+
     private GameState currentState;
     private MapConfig currentMap;
 
@@ -28,6 +35,8 @@ public class GameManager implements Listener {
     private final Map<UUID, TrackedPlayerData> trackedPlayers = new HashMap<>();
     public final Random random;
     public final Server server;
+    public final WorldBorder border;
+    public final World world;
 
     public int onlineCount = 0;
 
@@ -43,6 +52,12 @@ public class GameManager implements Listener {
         movementAllowed = true;
 
         this.server = server;
+        this.world = server.getWorlds().get(0);
+        this.border = world.getWorldBorder();
+
+        for (Player player : world.getPlayers()) {
+            trackedPlayers.put(player.getUniqueId(), new TrackedPlayerData(player, player.getName()));
+        }
         nextState(GameState.Waiting);
     }
 
@@ -119,6 +134,28 @@ public class GameManager implements Listener {
         return remaining;
     }
 
+    public void setBorderMax() {
+        MapConfig map = getCurrentMap();
+
+        double cX = map.getCenter().x();
+        double cZ = map.getCenter().z();
+        border.setCenter(cX, cZ);
+
+        double sX = map.getStartPos().x();
+        double eX = map.getEndPos().x();
+        double maxDistX = Math.max(Math.abs(cX - sX), Math.abs(cX - eX));
+
+        double sZ = map.getStartPos().z();
+        double eZ = map.getEndPos().z();
+        double maxDistZ = Math.max(Math.abs(cZ - sZ), Math.abs(cZ - eZ));
+
+        double maxDist = Math.max(maxDistX, maxDistZ);
+        border.setSize(maxDist * 2);
+
+        border.setWarningDistance(5);
+        border.setDamageBuffer(1);
+    }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
@@ -127,7 +164,7 @@ public class GameManager implements Listener {
             if(currentState == GameState.Waiting || currentMap == null) {
                 // Tylko podczas oczekiwania gracze mogą dołączać do gry
                 Location loc = Configuration.getSpawnLocation();
-                loc.setWorld(server.getWorlds().get(0));
+                loc.setWorld(world);
                 player.teleport(loc);
                 player.setGameMode(GameMode.SURVIVAL);
                 player.getInventory().clear();
@@ -187,6 +224,42 @@ public class GameManager implements Listener {
     }
 
     @EventHandler
+    public void onPlayerAnyDamage(EntityDamageEvent event) {
+        if(event.getEntity() instanceof Player player) {
+            if(player.isOp())
+                return;
+            if(event.getFinalDamage() > player.getHealth()) {
+                for (ItemStack itemStack : player.getInventory().getContents()) {
+                    if(itemStack == null)
+                        continue;
+                    player.getWorld().dropItemNaturally(player.getLocation(), itemStack);
+                    player.getInventory().removeItem(itemStack);
+                }
+                for (ItemStack itemStack : player.getInventory().getArmorContents()) {
+                    if(itemStack == null)
+                        continue;
+                    player.getWorld().dropItemNaturally(player.getLocation(), itemStack);
+                    player.getInventory().removeItem(itemStack);
+                }
+                player.setGameMode(GameMode.SPECTATOR);
+                event.setCancelled(true);
+
+                try {
+                    trackedPlayers.get(player.getUniqueId()).deaths++;
+                    if (event.getDamageSource().getCausingEntity() instanceof Player damager) {
+                        trackedPlayers.get(damager.getUniqueId()).kills++;
+                        server.sendMessage(Component.text("Gracz " + player.getName() + " został wyeliminowany przez " + damager.getName()));
+                    } else {
+                        server.sendMessage(Component.text("Gracz " + player.getName() + " został wyeliminowany"));
+                    }
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    @EventHandler
     public void onPlayerMoved(PlayerMoveEvent event) {
         Player player = event.getPlayer();
         if(!player.isOp()) {
@@ -195,6 +268,26 @@ public class GameManager implements Listener {
             }
         }
     }
+
+//    @EventHandler
+//    public void onPlayerDeath(PlayerDeathEvent event) {
+//        Player player = event.getPlayer();
+//        if(!player.isOp()) {
+//            server.sendMessage(Component.text("Gracz " + player.getName() + " został wyeliminowany", WHITE));
+//            Location deathLocation = player.getLocation();
+//            player.spigot().respawn();
+//            if(currentState == GameState.Waiting || currentMap == null) {
+//                // Teleportuj na spawn
+//                Location loc = Configuration.getSpawnLocation();
+//                loc.setWorld(world);
+//                player.teleport(loc);
+//            } else {
+//                // Zmień na spectatora w miejscu śmierci
+//                player.setGameMode(GameMode.SPECTATOR);
+//                player.teleport(deathLocation);
+//            }
+//        }
+//    }
 
     @EventHandler
     public void onTick(ServerTickStartEvent event) {

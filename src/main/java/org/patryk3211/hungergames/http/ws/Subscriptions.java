@@ -27,8 +27,6 @@ public class Subscriptions implements WebSocketRoute.IWebSocketResponder {
     }
 
     public void notify(String channel, String message) {
-        HungerGamesPlugin.LOG.info("Notify: " + message + "@" + channel);
-        HungerGamesPlugin.LOG.info(subscriptions.toString());
         final Set<NanoWSD.WebSocket> sockets = subscriptions.get(channel);
         if(sockets == null)
             return;

@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
+import org.patryk3211.hungergames.loot.LootConfig;
 import org.patryk3211.hungergames.map.MapConfig;
 
 import java.io.File;
@@ -25,6 +26,8 @@ public class Configuration {
     private static final String PVP_DELAY = "pvp_delay";
 
     private static final List<MapConfig> maps = new ArrayList<>();
+
+    private static LootConfig loot;
 
     public static void init(Plugin plugin) {
         FileConfiguration config = plugin.getConfig();
@@ -61,6 +64,12 @@ public class Configuration {
         if (maps.isEmpty()) {
             HungerGamesPlugin.LOG.warn("No maps were loaded");
         }
+
+        File itemsFile = new File(Path.of(dataDirectory.getPath(), "items.yml").toUri());
+        if(!itemsFile.exists()) {
+            plugin.saveResource("items.yml", false);
+        }
+        loot = new LootConfig(itemsFile);
     }
 
     /* -----===== Funkcje dające dostęp do konfiguracji =====----- */
@@ -89,6 +98,10 @@ public class Configuration {
 
     public static List<MapConfig> getMaps() {
         return maps;
+    }
+
+    public static LootConfig getLoot() {
+        return loot;
     }
 
     public static int getPvpDelay() {

@@ -25,7 +25,12 @@ public class TeleportState extends GameStateHandler {
             final Player player = playerList.remove(0).playerInstance;
             final Location spawn = spawns.next();
             player.teleport(spawn);
+            player.setSaturation(5f);
+            player.setFoodLevel(20);
         }
+
+        // Ustaw granicę świata na maksymalnej granicy mapy
+        manager.setBorderMax();
 
         manager.nextState(GameState.StartCountdown);
     }

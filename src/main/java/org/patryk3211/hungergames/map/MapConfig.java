@@ -153,4 +153,8 @@ public class MapConfig {
     public List<Location> getSpawnLocations() {
         return spawnLocations;
     }
+
+    public MapChests getChests() {
+        return chests;
+    }
 }

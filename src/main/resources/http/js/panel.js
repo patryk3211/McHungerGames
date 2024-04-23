@@ -116,6 +116,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Sesja nie wygasła
         await start_websocket();
         send_websocket('players');
+        send_websocket('count');
         send_websocket('subscribe', { channel: 'tracked' });
         send_websocket('subscribe', { channel: 'count' });
     }

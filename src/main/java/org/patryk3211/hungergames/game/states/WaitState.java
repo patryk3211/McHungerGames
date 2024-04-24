@@ -1,12 +1,14 @@
 package org.patryk3211.hungergames.game.states;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
 import org.patryk3211.hungergames.Configuration;
+import org.patryk3211.hungergames.game.GameManager;
 import org.patryk3211.hungergames.game.GameStateHandler;
 import org.patryk3211.hungergames.game.TrackedPlayerData;
 
@@ -15,7 +17,7 @@ public class WaitState extends GameStateHandler {
 
     @Override
     public @Nullable Component getHotBarTitle() {
-        return Component.text("Oczekiwanie na rozpoczęcie gry", Style.style(TextColor.color(255, 255,255)));
+        return Component.text("Oczekiwanie na rozpoczęcie gry", NamedTextColor.WHITE);
     }
 
     @Override

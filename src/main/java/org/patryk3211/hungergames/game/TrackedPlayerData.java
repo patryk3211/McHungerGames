@@ -2,6 +2,7 @@ package org.patryk3211.hungergames.game;
 
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.Scoreboard;
 import org.patryk3211.hungergames.HungerGamesPlugin;
 
 public class TrackedPlayerData {
@@ -9,6 +10,7 @@ public class TrackedPlayerData {
     public final String name;
     public int kills;
     public int deaths;
+    public Scoreboard scoreboard;
 
     public TrackedPlayerData(Player instance, String name) {
         this.playerInstance = instance;

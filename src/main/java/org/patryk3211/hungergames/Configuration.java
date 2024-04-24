@@ -4,6 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 import org.patryk3211.hungergames.loot.LootConfig;
 import org.patryk3211.hungergames.map.MapConfig;
 
@@ -89,10 +90,10 @@ public class Configuration {
         return configuration.getInt(HTTP_SESSION_TIMEOUT);
     }
 
-    public static Location getSpawnLocation() {
+    public static @NotNull Location getSpawnLocation() {
         List<Float> floats = configuration.getFloatList(PLAYER_SPAWN);
         if(floats.isEmpty())
-            return null;
+            throw new IllegalStateException("Player spawn not defined in configuration file");
         return new Location(null, floats.get(0), floats.get(1), floats.get(2));
     }
 

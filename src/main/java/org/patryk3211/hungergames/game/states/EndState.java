@@ -2,8 +2,13 @@ package org.patryk3211.hungergames.game.states;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
+import org.bukkit.block.data.type.Fire;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.patryk3211.hungergames.game.GameState;
 import org.patryk3211.hungergames.game.GameStateHandler;
 import org.patryk3211.hungergames.game.PlayerStatus;
@@ -44,7 +49,13 @@ public class EndState extends GameStateHandler {
                 double x = Math.cos(angle) * 6;
                 double z = Math.sin(angle) * 6;
                 spawnLoc.add(x, 1, z);
-                manager.world.spawnEntity(spawnLoc, EntityType.FIREWORK, true);
+                Firework firework = (Firework) manager.world.spawnEntity(spawnLoc, EntityType.FIREWORK);
+                FireworkMeta meta = firework.getFireworkMeta();
+                final FireworkEffect.Type[] effectTypes = FireworkEffect.Type.values();
+                final FireworkEffect.Type effectType = effectTypes[manager.random.nextInt(effectTypes.length)];
+                final Color fireworkColor = Color.fromRGB(manager.random.nextInt(255), manager.random.nextInt(255), manager.random.nextInt(255));
+                final FireworkEffect effect = FireworkEffect.builder().with(effectType).withColor(fireworkColor).build();
+                meta.addEffect(effect);
             }
         }
 

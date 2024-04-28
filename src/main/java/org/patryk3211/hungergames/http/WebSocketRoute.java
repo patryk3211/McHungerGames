@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import fi.iki.elonen.NanoWSD;
 import org.jetbrains.annotations.Nullable;
+import org.patryk3211.hungergames.http.ws.PlayerCount;
 import org.patryk3211.hungergames.http.ws.PlayerList;
 import org.patryk3211.hungergames.http.ws.Subscriptions;
 
@@ -24,6 +25,7 @@ public class WebSocketRoute extends NanoWSD {
     private void addResponders() {
         addResponder("subscribe", new Subscriptions());
         addResponder("players", new PlayerList());
+        addResponder("count", new PlayerCount());
     }
 
     private void addResponder(String type, IWebSocketResponder responder) {

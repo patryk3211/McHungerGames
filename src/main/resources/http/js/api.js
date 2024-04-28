@@ -51,6 +51,10 @@ function send_websocket(type, data) {
     WEBSOCKET.send(JSON.stringify(request));
 }
 
+function websocket_subscribe(channel) {
+    send_websocket('subscribe', { channel: channel });
+}
+
 function add_websocket_handler(type, handler) {
     WEBSOCKET_HANDLERS[type] = handler;
 }
@@ -122,5 +126,6 @@ export {
     start_websocket,
     send_websocket,
     add_websocket_handler,
+    websocket_subscribe,
     SESSION_ID_KEY
 };

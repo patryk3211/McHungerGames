@@ -2,19 +2,24 @@ package org.patryk3211.hungergames.game;
 
 import com.destroystokyo.paper.event.server.ServerTickStartEvent;
 import net.kyori.adventure.text.Component;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Server;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextColor;
+import org.apache.commons.lang3.ObjectUtils;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 import org.patryk3211.hungergames.Configuration;
 import org.patryk3211.hungergames.HungerGamesPlugin;
+import org.patryk3211.hungergames.game.states.PlayingState;
 import org.patryk3211.hungergames.http.ws.Subscriptions;
 import org.patryk3211.hungergames.map.MapConfig;
 
@@ -28,10 +33,15 @@ public class GameManager implements Listener {
     private final Map<UUID, TrackedPlayerData> trackedPlayers = new HashMap<>();
     public final Random random;
     public final Server server;
+    public final WorldBorder border;
+    public final World world;
+
+    public final Leaderboard leaderboard;
 
     public int onlineCount = 0;
 
-    public int actionBarTime = 0;
+    private int actionBarTime = 0;
+    private int sidebarTime = 0;
 
     public boolean pvpEnabled;
     public boolean movementAllowed;
@@ -43,6 +53,16 @@ public class GameManager implements Listener {
         movementAllowed = true;
 
         this.server = server;
+        this.world = server.getWorlds().get(0);
+        this.border = world.getWorldBorder();
+        this.leaderboard = new Leaderboard(server);
+
+        for (Player player : world.getPlayers()) {
+            TrackedPlayerData data = new TrackedPlayerData(player, player.getName());
+            trackedPlayers.put(player.getUniqueId(), data);
+            leaderboard.showTo(player, data);
+            onlineCount++;
+        }
         nextState(GameState.Waiting);
     }
 
@@ -57,6 +77,8 @@ public class GameManager implements Listener {
         if(currentState != actualState) {
             // Dodajemy akcję zmiany stanu do kolejki
             actionQueue.add(() -> {
+                if(currentState != null)
+                    currentState.stateManager.onLeave();
                 currentState = actualState;
                 currentState.stateManager.setManager(this);
                 currentState.stateManager.onEntry();
@@ -82,6 +104,15 @@ public class GameManager implements Listener {
                 }
             }
             actionBarTime = 0;
+        }
+
+        if(++sidebarTime == 10) {
+            for(TrackedPlayerData value : trackedPlayers.values()) {
+                if(value.playerInstance == null)
+                    continue;
+                leaderboard.updateScoreboard(value);
+            }
+            sidebarTime = 0;
         }
 
         // Uruchamia metode tick po wszystkich zmianach stanu
@@ -119,6 +150,28 @@ public class GameManager implements Listener {
         return remaining;
     }
 
+    public void setBorderMax() {
+        MapConfig map = getCurrentMap();
+
+        double cX = map.getCenter().x();
+        double cZ = map.getCenter().z();
+        border.setCenter(cX, cZ);
+
+        double sX = map.getStartPos().x();
+        double eX = map.getEndPos().x();
+        double maxDistX = Math.max(Math.abs(cX - sX), Math.abs(cX - eX));
+
+        double sZ = map.getStartPos().z();
+        double eZ = map.getEndPos().z();
+        double maxDistZ = Math.max(Math.abs(cZ - sZ), Math.abs(cZ - eZ));
+
+        double maxDist = Math.max(maxDistX, maxDistZ);
+        border.setSize(maxDist * 2);
+
+        border.setWarningDistance(5);
+        border.setDamageBuffer(1);
+    }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
@@ -127,7 +180,7 @@ public class GameManager implements Listener {
             if(currentState == GameState.Waiting || currentMap == null) {
                 // Tylko podczas oczekiwania gracze mogą dołączać do gry
                 Location loc = Configuration.getSpawnLocation();
-                loc.setWorld(server.getWorlds().get(0));
+                loc.setWorld(world);
                 player.teleport(loc);
                 player.setGameMode(GameMode.SURVIVAL);
                 player.getInventory().clear();
@@ -145,9 +198,25 @@ public class GameManager implements Listener {
                     return value;
                 }
             });
+            leaderboard.showTo(player, data);
             ++onlineCount;
             Subscriptions.notifyTracked(data);
             Subscriptions.notifyCount(onlineCount, getRemainingPlayerCount());
+        }
+    }
+
+    public static void dropPlayerInventory(Player player) {
+        for (ItemStack itemStack : player.getInventory().getContents()) {
+            if(itemStack == null)
+                continue;
+            player.getWorld().dropItemNaturally(player.getLocation(), itemStack);
+            player.getInventory().removeItem(itemStack);
+        }
+        for (ItemStack itemStack : player.getInventory().getArmorContents()) {
+            if(itemStack == null)
+                continue;
+            player.getWorld().dropItemNaturally(player.getLocation(), itemStack);
+            player.getInventory().removeItem(itemStack);
         }
     }
 
@@ -155,17 +224,27 @@ public class GameManager implements Listener {
     public void onPlayerLeave(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         if(!player.isOp()) {
+            TrackedPlayerData data = trackedPlayers.get(player.getUniqueId());
             if (currentState == GameState.Waiting) {
-                TrackedPlayerData data = trackedPlayers.get(player.getUniqueId());
                 if(data != null) {
                     data.playerInstance = null;
                     Subscriptions.notifyTracked(data);
                 }
             } else {
-                // Gracz wyszedł podczas gry
+                if(player.getGameMode() == GameMode.SURVIVAL) {
+                    // Gracz wyszedł podczas gry
+                    server.sendMessage(Component.text("Gracz " + player.getName() + " został wyeliminowany za wyjście z gry"));
+                    dropPlayerInventory(player);
+                    if (data != null) {
+                        data.addDeath();
+                        data.playerInstance = null;
+                    }
+                }
             }
             --onlineCount;
             Subscriptions.notifyCount(onlineCount, getRemainingPlayerCount());
+            if(data != null)
+                Subscriptions.notifyTracked(data);
         }
     }
 
@@ -183,6 +262,41 @@ public class GameManager implements Listener {
     public void onPlayerDamage(EntityDamageByEntityEvent event) {
         if(event.getDamager() instanceof Player && !pvpEnabled) {
             event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onPlayerAnyDamage(EntityDamageEvent event) {
+        if(event.getEntity() instanceof Player player) {
+            if(player.isOp())
+                return;
+            if(event.getFinalDamage() > player.getHealth()) {
+                event.setCancelled(true);
+
+                if(currentState == GameState.Waiting) {
+                    // Gdyby gracz jakoś umarł na spawnie
+                    player.setGameMode(GameMode.SURVIVAL);
+                    Location loc = Configuration.getSpawnLocation();
+                    loc.setWorld(world);
+                    player.teleport(loc);
+                } else {
+                    dropPlayerInventory(player);
+                    player.setGameMode(GameMode.SPECTATOR);
+                    try {
+                        TrackedPlayerData data = trackedPlayers.get(player.getUniqueId());
+                        data.addDeath();
+                        Subscriptions.notifyCount(onlineCount, getRemainingPlayerCount());
+                        if (event.getDamageSource().getCausingEntity() instanceof Player damager) {
+                            server.sendMessage(Component.text("Gracz " + player.getName() + " został wyeliminowany przez " + damager.getName()));
+                            trackedPlayers.get(damager.getUniqueId()).addKill();
+                        } else {
+                            server.sendMessage(Component.text("Gracz " + player.getName() + " został wyeliminowany"));
+                        }
+                    } catch (NullPointerException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
     }
 

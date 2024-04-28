@@ -5,15 +5,21 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Chest;
+import org.patryk3211.hungergames.Configuration;
 import org.patryk3211.hungergames.HungerGamesPlugin;
+import org.patryk3211.hungergames.loot.LootConfig;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class MapChests {
-    private final List<BlockState> chests = new LinkedList<>();
+    private final List<Location> chests = new LinkedList<>();
+    private final World world;
 
     public MapChests(MapConfig map, World world) {
+        this.world = world;
+
         Location start = map.getStartPos();
         Location end = map.getEndPos();
 
@@ -36,11 +42,25 @@ public class MapChests {
                         continue;
                     if(!map.isInMap(entity.getLocation()))
                         continue;
-                    chests.add(entity);
+                    chests.add(entity.getLocation());
                 }
             }
         }
 
         HungerGamesPlugin.LOG.info("Found " + chests.size() + " chests for map '" + map.getName() + "'");
+    }
+
+    public void refillAll() {
+        LootConfig loot = Configuration.getLoot();
+        for (Location chestLocation : chests) {
+            BlockState state = world.getBlockState(chestLocation);
+            if(state instanceof Chest chest) {
+                int targetCost = HungerGamesPlugin.manager.random.nextInt(5, 16);
+                chest.getBlockInventory().clear();
+                loot.fillChest(chest, targetCost);
+            } else {
+                HungerGamesPlugin.LOG.warn("Chest found at " + chestLocation + " is no longer a chest");
+            }
+        }
     }
 }

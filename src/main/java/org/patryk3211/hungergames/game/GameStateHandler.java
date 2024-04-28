@@ -15,5 +15,6 @@ public abstract class GameStateHandler {
     }
 
     public void onEntry() { }
+    public void onLeave() { }
     public abstract void tick();
 }

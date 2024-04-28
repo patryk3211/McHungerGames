@@ -1,0 +1,124 @@
+items:
+  - item: STONE_SWORD
+    amount: 1
+    rarity: 5
+    cost: 5
+  - item: GOLDEN_SWORD
+    amount: 1
+    rarity: 1
+    cost: 1
+  - item: MUSHROOM_STEW
+    amount: 1
+    rarity: 1
+    cost: 1
+  - item: STONE_HOE
+    amount: 1
+    rarity: 1
+    cost: 1
+  - item: LEATHER_HELMET
+    amount: 1
+    rarity: 2
+    cost: 2
+  - item: LEATHER_CHESTPLATE
+    amount: 1
+    rarity: 2
+    cost: 2
+  - item: LEATHER_LEGGINGS
+    amount: 1
+    rarity: 2
+    cost: 2
+  - item: IRON_HELMET
+    amount: 1
+    rarity: 2
+    cost: 2
+  - item: IRON_CHESTPLATE
+    amount: 1
+    rarity: 2
+    cost: 2
+  - item: IRON_LEGGINGS
+    amount: 1
+    rarity: 2
+    cost: 2
+  - item: IRON_BOOTS
+    amount: 1
+    rarity: 2
+    cost: 2
+  - item: BOW
+    amount: 1
+    rarity: 3
+    cost: 3
+  - item: ARROW
+    amount: 20
+    rarity: 2
+    cost: 2
+  - item: MILK_BUCKET
+    amount: 1
+    rarity: 2
+    cost: 2
+  - item: FISHING_ROD
+    amount: 1
+    rarity: 1
+    cost: 1
+  - item: GOLDEN_HELMET
+    amount: 1
+    rarity: 1
+    cost: 1
+  - item: GOLDEN_CHESTPLATE
+    amount: 1
+    rarity: 1
+    cost: 1
+  - item: BONE
+    amount: 1
+    rarity: 2
+    cost: 2
+  - item: GOLDEN_LEGGINGS
+    amount: 1
+    rarity: 1
+    cost: 1
+  - item: GOLDEN_BOOTS
+    amount: 1
+    rarity: 1
+    cost: 1
+  - item: DIAMOND_SWORD
+    amount: 1
+    rarity: 1
+    cost: 1
+  - item: GOLDEN_APPLE
+    amount: 1
+    rarity: 1
+    cost: 1
+  - item: CHAINMAIL_CHESTPLATE
+    amount: 1
+    rarity: 1
+    cost: 1
+  - item: CHAINMAIL_LEGGINGS
+    amount: 1
+    rarity: 1
+    cost: 1
+  - item: COOKIE
+    amount: 2
+    rarity: 3
+    cost: 3
+  - item: MELON_SLICE
+    amount: 1
+    rarity: 4
+    cost: 4
+  - item: COOKED_BEEF
+    amount: 1
+    rarity: 2
+    cost: 2
+  - item: ENDER_PEARL
+    amount: 1
+    rarity: 2
+    cost: 2
+  - item: APPLE
+    amount: 2
+    rarity: 5
+    cost: 5
+#  - POTION potion-type:SPEED:3600:1 1 rarity:2 cost:1 name:&rPotion_of_Swiftness
+#  - POTION potion-type:HEAL:1:1 1 rarity:2 cost:1 name:&rPotion_of_Healing
+#  - SPLASH_POTION potion-type:POISON:320:2 1 rarity:1 cost:1 color:green name:&rSplash_Potion_of_Poison
+#  - SPLASH_POTION potion-type:REGENERATION:660:1 1 rarity:2 cost:1 name:&rSplash_Potion_of_Regeneration
+#  - TIPPED_ARROW potion-base:long_poison rarity:1 cost:1
+#  - TIPPED_ARROW potion-base:strong_slowness rarity:1 cost:1
+#  - LINGERING_POTION potion-base:harming:false:false rarity:1 cost:1

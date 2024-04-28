@@ -22,6 +22,9 @@ public class PlayerList implements WebSocketRoute.IWebSocketResponder {
             JsonObject playerEntry = new JsonObject();
             playerEntry.addProperty("name", player.name);
             playerEntry.addProperty("state", player.getStatus().localizedName);
+            playerEntry.addProperty("deaths", player.getDeaths());
+            playerEntry.addProperty("kills", player.getKills());
+            playerEntry.addProperty("wins", player.getWins());
             playersJson.add(playerEntry);
         }
         response.add("players", playersJson);

@@ -14,6 +14,10 @@ public enum GameState {
     StartCountdown(new StartCountdownState()),
     // Gra się toczy
     Playing(new PlayingState()),
+    // Stan końca gry, pozostała jedna osoba, wygrany
+    End(new EndState()),
+    // Stan uruchamiany po zakończeniu gry
+    PostGame(new PostGameState()),
 
     // Pseudo stan do sygnalizowania początku gry
     StartGame(PickMap);

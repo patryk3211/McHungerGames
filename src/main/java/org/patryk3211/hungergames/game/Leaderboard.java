@@ -39,12 +39,12 @@ public class Leaderboard {
         lines.add(Component.join(
                 JoinConfiguration.noSeparators(),
                 Component.text(" Śmierci: ", GRAY),
-                Component.text(data.deaths, RED)
+                Component.text(data.getDeaths(), RED)
         ));
         lines.add(Component.join(
                 JoinConfiguration.noSeparators(),
                 Component.text(" Zabójstwa: ", GRAY),
-                Component.text(data.kills, RED)
+                Component.text(data.getKills(), RED)
         ));
 
         providers.forEach((_location, provider) -> {

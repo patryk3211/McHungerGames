@@ -13,3 +13,6 @@ spawn_location: [1000.5,65,1000.5]
 
 # Ustawia czas ochrony przed walką od rozpoczęcia gry w sekundach
 pvp_delay: 15
+
+# Ustawia czas od startu gry po jakim mapa zaczyna się zmniejszać
+shrink_delay: 60

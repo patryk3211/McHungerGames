@@ -20,9 +20,9 @@
                     <div class="w3-row flex gap flex-center w3-margin-bottom">
                         <div class="fit w3-center">
                             <div class="w3-border-bottom w3-xxlarge w3-container w3-text-dark-grey" id="gametimer">
-                                ??:??
+                                00:00
                             </div>
-                            <label class="w3-small w3-cell-top w3-text-grey">Pozostały czas gry</label>
+                            <label class="w3-small w3-cell-top w3-text-grey">Czas gry</label>
                         </div>
                         <div class="fit w3-center">
                             <div class="w3-border-bottom w3-xxlarge w3-container w3-text-dark-grey" id="playerleftcount">
@@ -40,13 +40,6 @@
                     <div class="w3-row flex gap flex-center w3-margin-bottom">
                         <button class="w3-button w3-green" data-apicall="start" data-success="Gra została rozpoczęta">Rozpocznij</button>
                     </div>
-                </section>
-            </div>
-            <div class="w3-third">
-                <section class="w3-margin w3-container w3-card">
-                    <header class="w3-container w3-border-bottom w3-border-teal w3-text-dark-grey w3-padding-small w3-margin-bottom">
-                        <h2 class="margin-0">Log</h2>
-                    </header>
                 </section>
             </div>
             <div class="w3-third">
@@ -70,6 +63,33 @@
                             <td class="name">@playername@</td>
                             <td class="status">@playerstatus@</td>
                             <td class="actions"><button class="w3-button w3-red" data-apicall="kick" data-apicall-player="@playername@">Wyrzuć</button></td>
+                        </tr>
+                    </template>
+                </section>
+            </div>
+            <div class="w3-third">
+                <section class="w3-margin w3-container w3-card">
+                    <header class="w3-container w3-border-bottom w3-border-teal w3-text-dark-grey w3-padding-small w3-margin-bottom">
+                        <h2 class="margin-0">Tablica wyników</h2>
+                    </header>
+                    <table class="w3-table w3-bordered rows-middle" id="scoretable">
+                        <thead>
+                        <tr>
+                            <th>Nazwa gracza</th>
+                            <th>Zabójstwa</th>
+                            <th>Śmierci</th>
+                            <th>Wygrane</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                    <template id="scoretable-entry">
+                        <tr>
+                            <td class="name">@name@</td>
+                            <td class="kills">@kills@</td>
+                            <td class="deaths">@deaths@</td>
+                            <td class="wins">@wins@</td>
                         </tr>
                     </template>
                 </section>

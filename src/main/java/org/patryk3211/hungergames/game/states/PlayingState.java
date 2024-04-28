@@ -6,8 +6,9 @@ import org.bukkit.Difficulty;
 import org.jetbrains.annotations.Nullable;
 import org.patryk3211.hungergames.Configuration;
 import org.patryk3211.hungergames.game.*;
+import org.patryk3211.hungergames.http.ws.Subscriptions;
+import org.patryk3211.hungergames.map.MapConfig;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,15 +17,16 @@ import static net.kyori.adventure.text.format.NamedTextColor.*;
 public class PlayingState extends GameStateHandler implements ILeaderboardProvider {
     private boolean shieldActive;
     private int shieldLeft;
+    private int mapShrinkDelay;
 
     private int timeTicks;
     private boolean mapShrinking;
-    private int mapSize;
 
     @Override
     public void onEntry() {
         shieldActive = true;
         shieldLeft = Configuration.getPvpDelay() * 20;
+        mapShrinkDelay = Configuration.getShrinkDelay() * 20;
         manager.movementAllowed = true;
         timeTicks = 0;
 
@@ -35,12 +37,11 @@ public class PlayingState extends GameStateHandler implements ILeaderboardProvid
         for (TrackedPlayerData value : manager.players()) {
             if (value.playerInstance == null)
                 continue;
-            value.playerInstance.sendActionBar(Component.text("Start!", WHITE));
+            value.playerInstance.sendActionBar(Component.text("Start!", GOLD));
         }
 
         manager.world.setDifficulty(Difficulty.HARD);
 
-        mapSize = (int) manager.border.getSize();
         mapShrinking = false;
 
         manager.leaderboard.addProvider(100, this);
@@ -56,25 +57,40 @@ public class PlayingState extends GameStateHandler implements ILeaderboardProvid
         if(shieldActive) {
             if (shieldLeft == 0) {
                 // Aktywuj PvP
-                manager.server.sendMessage(Component.text("Koniec ochrony przed walką", WHITE));
+                manager.server.sendMessage(Component.text("Koniec ochrony przed walką", GRAY));
                 manager.pvpEnabled = true;
                 shieldActive = false;
             } else {
                 if(shieldLeft % (20 * 5) == 0) {
                     // Wiadomości co 5 sekund (100 ticków)
-                    manager.server.sendMessage(Component.text("Pozostało " + (shieldLeft / 20) + " sekund ochrony", WHITE));
+                    manager.server.sendMessage(Component.text("Pozostało " + (shieldLeft / 20) + " sekund ochrony", GRAY));
                 }
             }
             --shieldLeft;
+        } else if(!mapShrinking) {
+            if(mapShrinkDelay == 0) {
+                // Zacznij zmniejszać mapę
+                MapConfig map = manager.getCurrentMap();
+                manager.border.setSize(map.getShrunkSize(), map.getShrinkTime());
+                mapShrinking = true;
+                manager.server.sendMessage(Component.text("Mapa zaczyna się zmniejszać", GRAY));
+            } else {
+                if(mapShrinkDelay % (20 * 30) == 0) {
+                    // Wiadomość co 30 sekund
+                    manager.server.sendMessage(Component.text("Mapa zacznie się zmniejszać za " + (mapShrinkDelay / 20) + " sekund", GRAY));
+                }
+            }
+            --mapShrinkDelay;
         }
 
-//        if(manager.getRemainingPlayerCount() <= 1) {
-//            // Został tylko jeden gracz więc gra została przez niego wygrana
-//            TrackedPlayerData winnerData = manager.players().stream().filter(data -> data.getStatus() == PlayerStatus.Alive).toList().get(0);
-//            manager.server.sendMessage(Component.text("Gre wygrał " + winnerData.name));
-//            manager.nextState(GameState.PostGame);
-//        }
+        if(manager.getRemainingPlayerCount() <= 1) {
+            // Został tylko jeden gracz więc gra została przez niego wygrana
+            manager.nextState(GameState.End);
+        }
 
+        if(timeTicks % (15 * 20) == 0) {
+            Subscriptions.notifyTime(gameTime());
+        }
         ++timeTicks;
     }
 
@@ -105,7 +121,7 @@ public class PlayingState extends GameStateHandler implements ILeaderboardProvid
         ));
         lines.add(Component.join(JoinConfiguration.noSeparators(),
                 Component.text(" Rozmiar mapy: ", GRAY),
-                Component.text(mapSize, mapShrinking ? RED : GREEN)
+                Component.text(Math.floor(manager.border.getSize()*10)/10, mapShrinking ? RED : GREEN)
         ));
         if(shieldActive) {
             lines.add(Component.join(JoinConfiguration.noSeparators(),

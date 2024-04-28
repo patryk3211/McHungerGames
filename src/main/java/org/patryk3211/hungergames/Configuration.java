@@ -25,6 +25,7 @@ public class Configuration {
 
     private static final String PLAYER_SPAWN = "spawn_location";
     private static final String PVP_DELAY = "pvp_delay";
+    private static final String SHRINK_DELAY = "shrink_delay";
 
     private static final List<MapConfig> maps = new ArrayList<>();
 
@@ -107,5 +108,9 @@ public class Configuration {
 
     public static int getPvpDelay() {
         return configuration.getInt(PVP_DELAY);
+    }
+
+    public static int getShrinkDelay() {
+        return configuration.getInt(SHRINK_DELAY);
     }
 }

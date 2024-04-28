@@ -59,7 +59,10 @@ public class Subscriptions implements WebSocketRoute.IWebSocketResponder {
         instance.notify("tracked",
         "{\"type\":\"tracked\"," +
                 "\"name\":\"" + data.name + "\"," +
-                "\"state\":\"" + data.getStatus().localizedName + "\"}");
+                "\"state\":\"" + data.getStatus().localizedName + "\"," +
+                "\"kills\":" + data.getKills() + "," +
+                "\"deaths\":" + data.getDeaths() + "," +
+                "\"wins\":" + data.getWins() + "}");
     }
 
     public static void notifyCount(int online, int remaining) {
@@ -67,5 +70,17 @@ public class Subscriptions implements WebSocketRoute.IWebSocketResponder {
                 "{\"type\":\"count\"," +
                         "\"online\":" + online + "," +
                         "\"remaining\":" + remaining + "}");
+    }
+
+    public static void notifyTime(int seconds) {
+        instance.notify("time",
+                "{\"type\":\"time\"," +
+                        "\"time\":" + seconds + "}");
+    }
+
+    public static void notifyWin(TrackedPlayerData winner) {
+        instance.notify("win",
+                "{\"type\":\"win\"," +
+                        "\"winner\":\"" + winner.name + "\"}");
     }
 }

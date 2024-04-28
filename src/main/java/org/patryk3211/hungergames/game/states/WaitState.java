@@ -11,6 +11,7 @@ import org.patryk3211.hungergames.Configuration;
 import org.patryk3211.hungergames.game.GameManager;
 import org.patryk3211.hungergames.game.GameStateHandler;
 import org.patryk3211.hungergames.game.TrackedPlayerData;
+import org.patryk3211.hungergames.http.ws.Subscriptions;
 
 public class WaitState extends GameStateHandler {
     private int tickCount;
@@ -28,6 +29,11 @@ public class WaitState extends GameStateHandler {
         manager.movementAllowed = true;
         manager.pvpEnabled = false;
         tickCount = 0;
+
+        for (TrackedPlayerData player : manager.players()) {
+            Subscriptions.notifyTracked(player);
+        }
+        Subscriptions.notifyCount(manager.onlineCount, manager.getRemainingPlayerCount());
     }
 
     @Override

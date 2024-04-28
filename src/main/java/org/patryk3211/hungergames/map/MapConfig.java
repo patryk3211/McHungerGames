@@ -19,6 +19,8 @@ public class MapConfig {
     private static final String MAP_BB_END = "bounding_box.end";
     private static final String MAP_SPAWN_LOCATIONS = "spawn_locations";
     private static final String MAP_CENTER = "center";
+    private static final String MAP_SHRINK_TIME = "shrink_time";
+    private static final String MAP_SHRUNK_SIZE = "shrunk_size";
 
     private final FileConfiguration file;
     private String name;
@@ -26,6 +28,8 @@ public class MapConfig {
     private Location endPos;
     private BoundingBox boundingBox;
     private Location center;
+    private int shrinkTime;
+    private double mapShrunkSize;
     private final List<Location> spawnLocations = new ArrayList<>();
 
     private MapChests chests;
@@ -90,6 +94,9 @@ public class MapConfig {
                 }
             }
         }
+
+        this.shrinkTime = this.file.getInt(MAP_SHRINK_TIME);
+        this.mapShrunkSize = this.file.getDouble(MAP_SHRUNK_SIZE);
 
         List<?> spawnLocations = this.file.getList(MAP_SPAWN_LOCATIONS);
         if (spawnLocations == null) {
@@ -156,5 +163,13 @@ public class MapConfig {
 
     public MapChests getChests() {
         return chests;
+    }
+
+    public int getShrinkTime() {
+        return shrinkTime;
+    }
+
+    public double getShrunkSize() {
+        return mapShrunkSize;
     }
 }

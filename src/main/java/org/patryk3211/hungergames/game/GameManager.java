@@ -236,14 +236,15 @@ public class GameManager implements Listener {
                     server.sendMessage(Component.text("Gracz " + player.getName() + " został wyeliminowany za wyjście z gry"));
                     dropPlayerInventory(player);
                     if (data != null) {
+                        data.addDeath();
                         data.playerInstance = null;
-                        data.deaths++;
-                        Subscriptions.notifyTracked(data);
                     }
                 }
             }
             --onlineCount;
             Subscriptions.notifyCount(onlineCount, getRemainingPlayerCount());
+            if(data != null)
+                Subscriptions.notifyTracked(data);
         }
     }
 
@@ -283,12 +284,11 @@ public class GameManager implements Listener {
                     player.setGameMode(GameMode.SPECTATOR);
                     try {
                         TrackedPlayerData data = trackedPlayers.get(player.getUniqueId());
-                        data.deaths++;
-                        Subscriptions.notifyTracked(data);
+                        data.addDeath();
                         Subscriptions.notifyCount(onlineCount, getRemainingPlayerCount());
                         if (event.getDamageSource().getCausingEntity() instanceof Player damager) {
-                            data.kills++;
                             server.sendMessage(Component.text("Gracz " + player.getName() + " został wyeliminowany przez " + damager.getName()));
+                            trackedPlayers.get(damager.getUniqueId()).addKill();
                         } else {
                             server.sendMessage(Component.text("Gracz " + player.getName() + " został wyeliminowany"));
                         }

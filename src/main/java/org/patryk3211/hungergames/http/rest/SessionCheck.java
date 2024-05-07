@@ -13,11 +13,7 @@ public class SessionCheck extends IntegratedWebServer.JsonRoute {
         String uuidStr = getJsonString(json, "sid");
         try {
             UUID sid = UUID.fromString(uuidStr);
-            boolean status = IntegratedWebServer.get().getSessionManager().isAuthorized(sid);
-            return NanoHTTPD.newFixedLengthResponse(
-                    NanoHTTPD.Response.Status.OK,
-                    "application/json",
-                    "{\"status\":" + (status ? "true" : "false") + "}");
+            return status(IntegratedWebServer.get().getSessionManager().isAuthorized(sid));
         } catch (IllegalArgumentException e) {
             throw new IntegratedWebServer.ApiRouteException("{\"msg\":\"Field 'sid' has a malformed UUID\"}");
         }

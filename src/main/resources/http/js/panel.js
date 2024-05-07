@@ -110,6 +110,14 @@ add_websocket_handler('players', json => {
 });
 
 add_websocket_handler('tracked', json => {
+    if(json.reset) {
+        // Delete all statistics
+        user_list = [];
+        document.querySelector('#playertable tbody').replaceChildren([]);
+        document.querySelector('#scoretable tbody').replaceChildren([]);
+        return;
+    }
+
     var handled = false;
     var userdata = { playername: json.name, playerstatus: json.state, deaths: json.deaths, kills: json.kills, wins: json.wins };
     for(var i = 0; i < user_list.length; ++i) {
@@ -178,8 +186,15 @@ add_websocket_handler('time', json => {
 
     document.querySelector('#gametimer').textContent = minutes + ":" + seconds;
 
-    if(timerUpInterval == null) {
-        timerUpInterval = setInterval(updateTimer, 1000);
+    if(json.stop) {
+        if(timerUpInterval != null) {
+            clearInterval(timerUpInterval);
+            timerUpInterval = null;
+        }
+    } else {
+        if(timerUpInterval == null) {
+            timerUpInterval = setInterval(updateTimer, 1000);
+        }
     }
 });
 

@@ -20,6 +20,7 @@ public class TrackedPlayerData {
         this.kills = 0;
         this.deaths = 0;
         this.wins = 0;
+        this.scoreboard = null;
     }
 
     public PlayerStatus getStatus() {

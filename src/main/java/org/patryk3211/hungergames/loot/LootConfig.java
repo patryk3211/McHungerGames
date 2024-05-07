@@ -14,15 +14,7 @@ import java.util.*;
 public class LootConfig {
     private final FileConfiguration configuration;
 
-    private static class ItemDef {
-        public final ItemStack stack;
-        public final int cost;
-
-        public ItemDef(ItemStack stack, int cost) {
-            this.stack = stack;
-            this.cost = cost;
-        }
-    }
+    private record ItemDef(ItemStack stack, int cost) { }
 
     private final List<ItemDef> items = new ArrayList<>();
 

@@ -19,6 +19,6 @@ public class KickPlayer extends IntegratedWebServer.JsonRoute {
         }
 
         HungerGamesPlugin.manager.deferredAction(player::kick);
-        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", "{\"status\":true}");
+        return status(true);
     }
 }

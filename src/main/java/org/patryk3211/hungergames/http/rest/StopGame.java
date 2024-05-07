@@ -7,16 +7,15 @@ import org.patryk3211.hungergames.HungerGamesPlugin;
 import org.patryk3211.hungergames.game.GameState;
 import org.patryk3211.hungergames.http.IntegratedWebServer;
 
-public class StartGame extends IntegratedWebServer.JsonRoute {
+public class StopGame extends IntegratedWebServer.JsonRoute {
     @Override
     protected NanoHTTPD.Response handle(RouterNanoHTTPD.UriResource uriResource, JsonObject json, NanoHTTPD.IHTTPSession ihttpSession) throws IntegratedWebServer.ApiRouteException {
         ensureSessionValid(json);
 
-        GameState state = HungerGamesPlugin.manager.currentState();
-        if(state != GameState.Waiting) {
-            throw new IntegratedWebServer.ApiRouteException(NanoHTTPD.Response.Status.CONFLICT, "{\"msg\":\"Nie można rozpocząć gry ponieważ ona już trwa\"}");
+        if(HungerGamesPlugin.manager.currentState() == GameState.Waiting) {
+            throw new IntegratedWebServer.ApiRouteException(NanoHTTPD.Response.Status.CONFLICT, "{\"msg\":\"Gra nie została jeszcze rozpoczęta\"}");
         }
-        HungerGamesPlugin.manager.nextState(GameState.StartGame);
-        return status(true);
+
+        return status(HungerGamesPlugin.manager.stopGame());
     }
 }

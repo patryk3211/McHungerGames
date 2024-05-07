@@ -41,6 +41,7 @@ public class PlayingState extends GameStateHandler implements ILeaderboardProvid
             if (value.playerInstance == null)
                 continue;
             value.playerInstance.sendActionBar(Component.text("Start!", GOLD));
+            Subscriptions.notifyTracked(value);
         }
 
         manager.world.setDifficulty(Difficulty.HARD);

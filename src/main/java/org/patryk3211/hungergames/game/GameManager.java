@@ -2,9 +2,6 @@ package org.patryk3211.hungergames.game;
 
 import com.destroystokyo.paper.event.server.ServerTickStartEvent;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextColor;
-import org.apache.commons.lang3.ObjectUtils;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,14 +9,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.patryk3211.hungergames.Configuration;
 import org.patryk3211.hungergames.HungerGamesPlugin;
-import org.patryk3211.hungergames.game.states.PlayingState;
 import org.patryk3211.hungergames.http.ws.Subscriptions;
 import org.patryk3211.hungergames.map.MapConfig;
 

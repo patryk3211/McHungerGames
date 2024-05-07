@@ -1,9 +1,7 @@
 package org.patryk3211.hungergames.loot;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;

@@ -3,6 +3,7 @@ package org.patryk3211.hungergames;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.patryk3211.hungergames.loot.LootConfig;
@@ -10,8 +11,7 @@ import org.patryk3211.hungergames.map.MapConfig;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Configuration {
     private static FileConfiguration configuration = null;
@@ -72,6 +72,11 @@ public class Configuration {
             plugin.saveResource("items.yml", false);
         }
         loot = new LootConfig(itemsFile);
+
+        File credentialsFile = new File(Path.of(dataDirectory.getPath(), "credentials.yml").toUri());
+        if(!credentialsFile.exists()) {
+            plugin.saveResource("credentials.yml", false);
+        }
     }
 
     /* -----===== Funkcje dające dostęp do konfiguracji =====----- */
@@ -79,10 +84,12 @@ public class Configuration {
         return configuration.getInt(HTTP_PORT_PATH);
     }
 
+    @Deprecated
     public static String getHttpUser() {
         return configuration.getString(HTTP_USER_PATH);
     }
 
+    @Deprecated
     public static String getHttpPassword() {
         return configuration.getString(HTTP_PASSWORD_PATH);
     }
@@ -112,5 +119,27 @@ public class Configuration {
 
     public static int getShrinkDelay() {
         return configuration.getInt(SHRINK_DELAY);
+    }
+
+    public record CredentialPair(String user, String password) { }
+
+    public static Collection<CredentialPair> loadCredentials() {
+        File credentialsFile = new File(Path.of(dataDirectory.getPath(), "credentials.yml").toUri());
+        if(credentialsFile.exists()) {
+            YamlConfiguration file = YamlConfiguration.loadConfiguration(credentialsFile);
+            List<Map<?, ?>> credentialsMap = file.getMapList("credentials");
+            List<CredentialPair> credentials = new LinkedList<>();
+            credentialsMap.forEach(entry -> {
+                Object user = entry.get("user");
+                Object password = entry.get("password");
+                if(!(user instanceof String userStr) || !(password instanceof String passwordStr)) {
+                    HungerGamesPlugin.LOG.warn("Credentials file contains an invalid entry");
+                    return;
+                }
+                credentials.add(new CredentialPair(userStr, passwordStr));
+            });
+            return credentials;
+        }
+        return null;
     }
 }

@@ -127,8 +127,8 @@ add_websocket_handler('tracked', json => {
         } else {
             // Names are bigger but not equal, insert a new user here
             var templateCopy = document.querySelector('#playertable-entry').content.cloneNode(true);
-            for(var i = 0; i < templateCopy.children.length; ++i) {
-                var el = templateCopy.children.item(i);
+            for(var j = 0; j < templateCopy.children.length; ++j) {
+                var el = templateCopy.children.item(j);
                 el.innerHTML = el.innerHTML.replaceAll(/@(\w*)@/g, (m, key) => userdata.hasOwnProperty(key) ? userdata[key] : '');
             }
             process_api_buttons(templateCopy);
@@ -140,14 +140,7 @@ add_websocket_handler('tracked', json => {
         }
     }
     if(!handled) {
-        var templateCopy = document.querySelector('#playertable-entry').content.cloneNode(true);
-        for(var i = 0; i < templateCopy.children.length; ++i) {
-            var el = templateCopy.children.item(i);
-            el.innerHTML = el.innerHTML.replaceAll(/@(\w*)@/g, (m, key) => userdata.hasOwnProperty(key) ? userdata[key] : '');
-        }
-        process_api_buttons(templateCopy);
-        var element = templateCopy.children[0];
-        document.querySelector('#playertable tbody').appendChild(templateCopy);
+        var element = add_user(userdata);
         user_list.push({ name: json.name, state: json.state, element: element, deaths: json.deaths, kills: json.kills, wins: json.wins });
     }
 

@@ -7,6 +7,7 @@ import org.patryk3211.hungergames.http.IntegratedWebServer;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.util.Collection;
 
 public final class HungerGamesPlugin extends JavaPlugin {
     public static Logger LOG;
@@ -27,7 +28,15 @@ public final class HungerGamesPlugin extends JavaPlugin {
         // Stwórz serwer HTTP
         webServer = new IntegratedWebServer(Configuration.getHttpPort(), Configuration.getHttpSessionTimeout() * 60L, LOG);
         // Dodaj dane logowania z pliku konfiguracyjnego
-        webServer.getSessionManager().addCredentials(Configuration.getHttpUser(), Configuration.getHttpPassword());
+        if(Configuration.getHttpUser() != null && Configuration.getHttpPassword() != null) {
+            LOG.warn("Using deprecated method of specifying WebUI credentials, please update");
+            webServer.getSessionManager().addCredentials(Configuration.getHttpUser(), Configuration.getHttpPassword());
+        }
+        Collection<Configuration.CredentialPair> credentials = Configuration.loadCredentials();
+        if(credentials != null) {
+            LOG.info("Loading credentials file");
+            credentials.forEach(pair -> webServer.getSessionManager().addCredentials(pair.user(), pair.password()));
+        }
 
         // Tworzymy menedżer stanu gry
         manager = new GameManager(getServer());

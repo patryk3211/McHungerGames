@@ -2,6 +2,7 @@ package org.patryk3211.hungergames.game.states;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.patryk3211.hungergames.Configuration;
@@ -15,7 +16,7 @@ public class PostGameState extends GameStateHandler {
     @Override
     public void onEntry() {
         // Usuwa wszystkie itemy leżące na ziemi
-        Collection<Item> items = manager.world.getEntitiesByClass(Item.class);
+        Collection<Entity> items = manager.world.getEntitiesByClasses(Item.class, Arrow.class);
         items.forEach(Entity::remove);
 
         // Przenosimy graczy na spawn
@@ -26,6 +27,8 @@ public class PostGameState extends GameStateHandler {
                 player.playerInstance.teleport(loc);
                 player.playerInstance.setGameMode(GameMode.SURVIVAL);
                 player.playerInstance.getInventory().clear();
+                player.playerInstance.clearActivePotionEffects();
+                player.playerInstance.setArrowsInBody(0, true);
             }
         }
 

@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -253,6 +254,16 @@ public class GameManager implements Listener {
         if(!player.isOp()) {
             // Zakazujemy niszczenia bloków dla zwykłych graczy
             player.sendMessage("Nie możesz niszczyć bloków");
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent event) {
+        Player player = event.getPlayer();
+        if(!player.isOp()) {
+            // Zakazujemy stawiania bloków dla zwykłych graczy
+            player.sendMessage("Nie możesz stawiać bloków");
             event.setCancelled(true);
         }
     }

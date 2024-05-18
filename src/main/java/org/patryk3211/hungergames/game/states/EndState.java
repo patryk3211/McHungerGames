@@ -5,7 +5,6 @@ import net.kyori.adventure.title.Title;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
-import org.bukkit.block.data.type.Fire;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -16,6 +15,7 @@ import org.patryk3211.hungergames.game.TrackedPlayerData;
 import org.patryk3211.hungergames.http.ws.Subscriptions;
 
 import java.time.Duration;
+import java.util.List;
 
 import static net.kyori.adventure.text.format.NamedTextColor.GOLD;
 
@@ -25,7 +25,12 @@ public class EndState extends GameStateHandler {
 
     @Override
     public void onEntry() {
-        winnerData = manager.players().stream().filter(data -> data.getStatus() == PlayerStatus.Alive).toList().get(0);
+        List<TrackedPlayerData> winnerList = manager.players().stream().filter(data -> data.getStatus() == PlayerStatus.Alive).toList();
+        winnerData = !winnerList.isEmpty() ? winnerList.get(0) : null;
+        if(winnerData == null) {
+            manager.nextState(GameState.PostGame);
+            return;
+        }
         manager.server.sendMessage(Component.text("Gre wygrał " + winnerData.name));
         if(winnerData.playerInstance != null) {
             winnerData.playerInstance.showTitle(Title.title(
@@ -56,6 +61,8 @@ public class EndState extends GameStateHandler {
                 final Color fireworkColor = Color.fromRGB(manager.random.nextInt(255), manager.random.nextInt(255), manager.random.nextInt(255));
                 final FireworkEffect effect = FireworkEffect.builder().with(effectType).withColor(fireworkColor).build();
                 meta.addEffect(effect);
+                meta.setPower(1);
+                firework.setFireworkMeta(meta);
             }
         }
 

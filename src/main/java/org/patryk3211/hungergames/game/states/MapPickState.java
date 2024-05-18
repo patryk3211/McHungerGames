@@ -11,10 +11,14 @@ import java.util.List;
 public class MapPickState extends GameStateHandler {
     @Override
     public void onEntry() {
-        HungerGamesPlugin.LOG.info("Game start triggered, picking map");
-
-        final List<MapConfig> maps = Configuration.getMaps();
-        manager.setMap(maps.get(manager.random.nextInt(maps.size())));
+        if(manager.selectedMap == null) {
+            HungerGamesPlugin.LOG.info("Game start triggered, picking map");
+            final List<MapConfig> maps = Configuration.getMaps();
+            manager.setMap(maps.get(manager.random.nextInt(maps.size())));
+        } else {
+            HungerGamesPlugin.LOG.info("Game start triggered, with map '" + manager.selectedMap.getName() + "'");
+            manager.setMap(manager.selectedMap);
+        }
         manager.nextState(GameState.Teleport);
     }
 

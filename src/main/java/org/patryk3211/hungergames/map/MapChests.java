@@ -55,7 +55,7 @@ public class MapChests {
         for (Location chestLocation : chests) {
             BlockState state = world.getBlockState(chestLocation);
             if(state instanceof Chest chest) {
-                int targetCost = HungerGamesPlugin.manager.random.nextInt(5, 16);
+                int targetCost = HungerGamesPlugin.manager.random.nextInt(6, 25);
                 chest.getBlockInventory().clear();
                 loot.fillChest(chest, targetCost);
             } else {

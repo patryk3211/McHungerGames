@@ -57,12 +57,17 @@ public class Subscriptions implements WebSocketRoute.IWebSocketResponder {
 
     public static void notifyTracked(TrackedPlayerData data) {
         instance.notify("tracked",
-        "{\"type\":\"tracked\"," +
-                "\"name\":\"" + data.name + "\"," +
-                "\"state\":\"" + data.getStatus().localizedName + "\"," +
-                "\"kills\":" + data.getKills() + "," +
-                "\"deaths\":" + data.getDeaths() + "," +
-                "\"wins\":" + data.getWins() + "}");
+                "{\"type\":\"tracked\"," +
+                        "\"name\":\"" + data.name + "\"," +
+                        "\"state\":\"" + data.getStatus().localizedName + "\"," +
+                        "\"kills\":" + data.getKills() + "," +
+                        "\"deaths\":" + data.getDeaths() + "," +
+                        "\"wins\":" + data.getWins() + "}");
+    }
+
+    public static void notifyTrackedReset() {
+        instance.notify("tracked",
+                "{\"type\":\"tracked\", \"reset\": true}");
     }
 
     public static void notifyCount(int online, int remaining) {
@@ -76,6 +81,14 @@ public class Subscriptions implements WebSocketRoute.IWebSocketResponder {
         instance.notify("time",
                 "{\"type\":\"time\"," +
                         "\"time\":" + seconds + "}");
+    }
+
+    public static void notifyTimeStop() {
+        instance.notify("time",
+                "{\"type\":\"time\"," +
+                        "\"time\":0," +
+                        "\"stop\":true}");
+
     }
 
     public static void notifyWin(TrackedPlayerData winner) {

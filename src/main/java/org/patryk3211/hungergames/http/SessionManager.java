@@ -1,7 +1,9 @@
 package org.patryk3211.hungergames.http;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class SessionManager {
     private static class SessionData {

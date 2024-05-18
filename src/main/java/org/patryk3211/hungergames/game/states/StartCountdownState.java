@@ -2,10 +2,7 @@ package org.patryk3211.hungergames.game.states;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
-import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.Nullable;
-import org.patryk3211.hungergames.game.GameManager;
 import org.patryk3211.hungergames.game.GameState;
 import org.patryk3211.hungergames.game.GameStateHandler;
 import org.patryk3211.hungergames.game.ILeaderboardProvider;

@@ -1,14 +1,13 @@
 package org.patryk3211.hungergames.http;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoWSD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
-import org.patryk3211.hungergames.http.rest.KickPlayer;
-import org.patryk3211.hungergames.http.rest.SessionAuth;
-import org.patryk3211.hungergames.http.rest.SessionCheck;
-import org.patryk3211.hungergames.http.rest.StartGame;
+import org.patryk3211.hungergames.http.rest.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +47,9 @@ public class IntegratedWebServer extends RouterNanoHTTPD {
         addRoute("/api/auth", SessionAuth.class);
         addRoute("/api/start", StartGame.class);
         addRoute("/api/kick", KickPlayer.class);
+        addRoute("/api/reset_track", ResetTracking.class);
+        addRoute("/api/stop", StopGame.class);
+        addRoute("/api/maps", Maps.class);
 
         // Inne odpowiedzi na zapytania będą odczytywane z plików
         addRoute(".*", Frontend.class);
@@ -151,6 +153,10 @@ public class IntegratedWebServer extends RouterNanoHTTPD {
             } catch (IllegalArgumentException e) {
                 throw new ApiRouteException("{\"msg\":\"Field 'sid' has a malformed UUID\"}");
             }
+        }
+
+        public static NanoHTTPD.Response status(boolean status) {
+            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json", "{\"status\":" + (status ? "true" : "false") + "}");
         }
 
         protected abstract Response handle(UriResource uriResource, JsonObject json, IHTTPSession ihttpSession) throws ApiRouteException;

@@ -2,32 +2,32 @@ package org.patryk3211.hungergames.game;
 
 import com.destroystokyo.paper.event.server.ServerTickStartEvent;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextColor;
-import org.apache.commons.lang3.ObjectUtils;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.patryk3211.hungergames.Configuration;
 import org.patryk3211.hungergames.HungerGamesPlugin;
-import org.patryk3211.hungergames.game.states.PlayingState;
 import org.patryk3211.hungergames.http.ws.Subscriptions;
 import org.patryk3211.hungergames.map.MapConfig;
 
 import java.util.*;
 
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
+
 public class GameManager implements Listener {
     private GameState currentState;
     private MapConfig currentMap;
+
+    public MapConfig selectedMap;
 
     private final Queue<Runnable> actionQueue = new LinkedList<>();
     private final Map<UUID, TrackedPlayerData> trackedPlayers = new HashMap<>();
@@ -51,6 +51,7 @@ public class GameManager implements Listener {
         random = new Random();
         pvpEnabled = false;
         movementAllowed = true;
+        selectedMap = null;
 
         this.server = server;
         this.world = server.getWorlds().get(0);
@@ -58,6 +59,8 @@ public class GameManager implements Listener {
         this.leaderboard = new Leaderboard(server);
 
         for (Player player : world.getPlayers()) {
+            if(player.isOp())
+                continue;
             TrackedPlayerData data = new TrackedPlayerData(player, player.getName());
             trackedPlayers.put(player.getUniqueId(), data);
             leaderboard.showTo(player, data);
@@ -259,6 +262,16 @@ public class GameManager implements Listener {
     }
 
     @EventHandler
+    public void onBlockPlace(BlockPlaceEvent event) {
+        Player player = event.getPlayer();
+        if(!player.isOp()) {
+            // Zakazujemy stawiania bloków dla zwykłych graczy
+            player.sendMessage("Nie możesz stawiać bloków");
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
     public void onPlayerDamage(EntityDamageByEntityEvent event) {
         if(event.getDamager() instanceof Player && !pvpEnabled) {
             event.setCancelled(true);
@@ -313,5 +326,50 @@ public class GameManager implements Listener {
     @EventHandler
     public void onTick(ServerTickStartEvent event) {
         tick();
+    }
+
+    public void clearTrackedPlayers() {
+        trackedPlayers.clear();
+        Subscriptions.notifyTrackedReset();
+        onlineCount = 0;
+
+        // Tworzy nowe dane dla graczy online
+        for (Player player : world.getPlayers()) {
+            if(player.isOp())
+                continue;
+            TrackedPlayerData data = new TrackedPlayerData(player, player.getName());
+            trackedPlayers.put(player.getUniqueId(), data);
+            deferredAction(() -> leaderboard.showTo(player, data));
+            onlineCount++;
+            Subscriptions.notifyTracked(data);
+        }
+
+        Subscriptions.notifyCount(onlineCount, getRemainingPlayerCount());
+    }
+
+    public boolean stopGame() {
+        if(currentState == GameState.Waiting)
+            return false;
+
+        deferredAction(() -> {
+            for (TrackedPlayerData playerData : trackedPlayers.values()) {
+                if (playerData.playerInstance != null) {
+                    Player player = playerData.playerInstance;
+                    Location loc = Configuration.getSpawnLocation();
+                    loc.setWorld(world);
+                    player.teleport(loc);
+                    player.setGameMode(GameMode.SURVIVAL);
+                    player.getInventory().clear();
+                    player.clearActivePotionEffects();
+                    player.setArrowsInBody(0, true);
+                    Subscriptions.notifyTracked(playerData);
+                }
+            }
+            server.sendMessage(Component.text("Gra została zatrzymana przez administratora", RED));
+            nextState(GameState.Waiting);
+            Subscriptions.notifyTimeStop();
+            Subscriptions.notifyCount(onlineCount, getRemainingPlayerCount());
+        });
+        return true;
     }
 }

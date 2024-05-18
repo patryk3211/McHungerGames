@@ -5,7 +5,10 @@ import net.kyori.adventure.text.JoinConfiguration;
 import org.bukkit.Difficulty;
 import org.jetbrains.annotations.Nullable;
 import org.patryk3211.hungergames.Configuration;
-import org.patryk3211.hungergames.game.*;
+import org.patryk3211.hungergames.game.GameState;
+import org.patryk3211.hungergames.game.GameStateHandler;
+import org.patryk3211.hungergames.game.ILeaderboardProvider;
+import org.patryk3211.hungergames.game.TrackedPlayerData;
 import org.patryk3211.hungergames.http.ws.Subscriptions;
 import org.patryk3211.hungergames.map.MapConfig;
 
@@ -38,6 +41,7 @@ public class PlayingState extends GameStateHandler implements ILeaderboardProvid
             if (value.playerInstance == null)
                 continue;
             value.playerInstance.sendActionBar(Component.text("Start!", GOLD));
+            Subscriptions.notifyTracked(value);
         }
 
         manager.world.setDifficulty(Difficulty.HARD);

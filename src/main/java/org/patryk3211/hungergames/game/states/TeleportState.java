@@ -25,6 +25,7 @@ public class TeleportState extends GameStateHandler {
             final Player player = playerList.remove(0).playerInstance;
             final Location spawn = spawns.next();
             player.teleport(spawn);
+            player.clearActivePotionEffects();
             player.setSaturation(5f);
             player.setFoodLevel(20);
         }

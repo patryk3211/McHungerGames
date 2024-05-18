@@ -110,6 +110,14 @@ add_websocket_handler('players', json => {
 });
 
 add_websocket_handler('tracked', json => {
+    if(json.reset) {
+        // Delete all statistics
+        user_list = [];
+        document.querySelector('#playertable tbody').replaceChildren([]);
+        document.querySelector('#scoretable tbody').replaceChildren([]);
+        return;
+    }
+
     var handled = false;
     var userdata = { playername: json.name, playerstatus: json.state, deaths: json.deaths, kills: json.kills, wins: json.wins };
     for(var i = 0; i < user_list.length; ++i) {
@@ -127,8 +135,8 @@ add_websocket_handler('tracked', json => {
         } else {
             // Names are bigger but not equal, insert a new user here
             var templateCopy = document.querySelector('#playertable-entry').content.cloneNode(true);
-            for(var i = 0; i < templateCopy.children.length; ++i) {
-                var el = templateCopy.children.item(i);
+            for(var j = 0; j < templateCopy.children.length; ++j) {
+                var el = templateCopy.children.item(j);
                 el.innerHTML = el.innerHTML.replaceAll(/@(\w*)@/g, (m, key) => userdata.hasOwnProperty(key) ? userdata[key] : '');
             }
             process_api_buttons(templateCopy);
@@ -140,14 +148,7 @@ add_websocket_handler('tracked', json => {
         }
     }
     if(!handled) {
-        var templateCopy = document.querySelector('#playertable-entry').content.cloneNode(true);
-        for(var i = 0; i < templateCopy.children.length; ++i) {
-            var el = templateCopy.children.item(i);
-            el.innerHTML = el.innerHTML.replaceAll(/@(\w*)@/g, (m, key) => userdata.hasOwnProperty(key) ? userdata[key] : '');
-        }
-        process_api_buttons(templateCopy);
-        var element = templateCopy.children[0];
-        document.querySelector('#playertable tbody').appendChild(templateCopy);
+        var element = add_user(userdata);
         user_list.push({ name: json.name, state: json.state, element: element, deaths: json.deaths, kills: json.kills, wins: json.wins });
     }
 
@@ -185,8 +186,15 @@ add_websocket_handler('time', json => {
 
     document.querySelector('#gametimer').textContent = minutes + ":" + seconds;
 
-    if(timerUpInterval == null) {
-        timerUpInterval = setInterval(updateTimer, 1000);
+    if(json.stop) {
+        if(timerUpInterval != null) {
+            clearInterval(timerUpInterval);
+            timerUpInterval = null;
+        }
+    } else {
+        if(timerUpInterval == null) {
+            timerUpInterval = setInterval(updateTimer, 1000);
+        }
     }
 });
 
@@ -209,5 +217,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         websocket_subscribe('count');
         websocket_subscribe('time');
         websocket_subscribe('win');
+
+        var maps = await call_api('maps', { sid: session_id() });
+        if(maps.status == 200) {
+            var mapsJson = JSON.parse(await maps.text());
+            var selector = document.querySelector('#mapselector');
+
+            for(var i = 0; i < mapsJson.maps.length; ++i) {
+                var map = mapsJson.maps[i];
+                var option = document.createElement('option');
+                option.value = map.id;
+                option.textContent = map.name;
+                selector.appendChild(option);
+            }
+
+            selector.addEventListener('change', e => {
+                var startGameButton = document.querySelector('#startgamebutton');
+                if(selector.value == "") {
+                    delete startGameButton.dataset['apicallMap'];
+                } else {
+                    startGameButton.dataset['apicallMap'] = selector.value;
+                    console.log(selector.value);
+                }
+            });
+        }
     }
 })

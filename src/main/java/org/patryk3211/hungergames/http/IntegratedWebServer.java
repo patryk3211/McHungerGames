@@ -49,6 +49,7 @@ public class IntegratedWebServer extends RouterNanoHTTPD {
         addRoute("/api/kick", KickPlayer.class);
         addRoute("/api/reset_track", ResetTracking.class);
         addRoute("/api/stop", StopGame.class);
+        addRoute("/api/maps", Maps.class);
 
         // Inne odpowiedzi na zapytania będą odczytywane z plików
         addRoute(".*", Frontend.class);

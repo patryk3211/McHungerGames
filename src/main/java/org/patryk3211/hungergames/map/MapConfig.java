@@ -93,6 +93,8 @@ public class MapConfig {
                     this.name = matchedName;
                 }
             }
+        } else {
+            this.name = confName;
         }
 
         this.shrinkTime = this.file.getInt(MAP_SHRINK_TIME);

@@ -27,6 +27,8 @@ public class GameManager implements Listener {
     private GameState currentState;
     private MapConfig currentMap;
 
+    public MapConfig selectedMap;
+
     private final Queue<Runnable> actionQueue = new LinkedList<>();
     private final Map<UUID, TrackedPlayerData> trackedPlayers = new HashMap<>();
     public final Random random;
@@ -49,6 +51,7 @@ public class GameManager implements Listener {
         random = new Random();
         pvpEnabled = false;
         movementAllowed = true;
+        selectedMap = null;
 
         this.server = server;
         this.world = server.getWorlds().get(0);

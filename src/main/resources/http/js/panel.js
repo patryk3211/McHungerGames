@@ -217,5 +217,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         websocket_subscribe('count');
         websocket_subscribe('time');
         websocket_subscribe('win');
+
+        var maps = await call_api('maps', { sid: session_id() });
+        if(maps.status == 200) {
+            var mapsJson = JSON.parse(await maps.text());
+            var selector = document.querySelector('#mapselector');
+
+            for(var i = 0; i < mapsJson.maps.length; ++i) {
+                var map = mapsJson.maps[i];
+                var option = document.createElement('option');
+                option.value = map.id;
+                option.textContent = map.name;
+                selector.appendChild(option);
+            }
+
+            selector.addEventListener('change', e => {
+                var startGameButton = document.querySelector('#startgamebutton');
+                if(selector.value == "") {
+                    delete startGameButton.dataset['apicallMap'];
+                } else {
+                    startGameButton.dataset['apicallMap'] = selector.value;
+                    console.log(selector.value);
+                }
+            });
+        }
     }
 })

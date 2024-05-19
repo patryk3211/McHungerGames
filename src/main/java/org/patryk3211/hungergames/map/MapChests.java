@@ -54,7 +54,7 @@ public class MapChests {
                 final BlockState[] tileEntities = chunk.getTileEntities();
                 for(BlockState entity : tileEntities) {
                     if(!isLootContainer(entity))
-                        return;
+                        continue;
                     if(!map.isInMap(entity.getLocation()))
                         continue;
                     chests.add(entity.getLocation());

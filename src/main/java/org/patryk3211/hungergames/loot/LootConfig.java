@@ -2,6 +2,7 @@ package org.patryk3211.hungergames.loot;
 
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
+import org.bukkit.block.Container;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;
@@ -42,8 +43,14 @@ public class LootConfig {
     }
 
     public void fillChest(Chest chest, int targetCost) {
-        Inventory inv = chest.getInventory();
+        fillInventory(chest.getInventory(), targetCost);
+    }
 
+    public void fillContainer(Container container, int targetCost) {
+        fillInventory(container.getInventory(), targetCost);
+    }
+
+    public void fillInventory(Inventory inv, int targetCost) {
         int triesLeft = 15;
         int currentCost = 0;
 

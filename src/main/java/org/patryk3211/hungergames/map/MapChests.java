@@ -5,7 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.Chest;
+import org.bukkit.block.Container;
 import org.patryk3211.hungergames.Configuration;
 import org.patryk3211.hungergames.HungerGamesPlugin;
 import org.patryk3211.hungergames.loot.LootConfig;
@@ -14,8 +14,23 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class MapChests {
+    private static final Material[] LOOT_CONTAINERS = {
+            Material.CHEST,
+            Material.BARREL,
+            Material.TRAPPED_CHEST,
+            Material.SHULKER_BOX
+    };
+
     private final List<Location> chests = new LinkedList<>();
     private final World world;
+
+    public boolean isLootContainer(BlockState entity) {
+        for (Material type : LOOT_CONTAINERS) {
+            if(entity.getType() == type)
+                return true;
+        }
+        return false;
+    }
 
     public MapChests(MapConfig map, World world) {
         this.world = world;
@@ -38,8 +53,8 @@ public class MapChests {
                 Chunk chunk = world.getChunkAt(chunkX, chunkZ);
                 final BlockState[] tileEntities = chunk.getTileEntities();
                 for(BlockState entity : tileEntities) {
-                    if(entity.getType() != Material.CHEST)
-                        continue;
+                    if(!isLootContainer(entity))
+                        return;
                     if(!map.isInMap(entity.getLocation()))
                         continue;
                     chests.add(entity.getLocation());
@@ -47,19 +62,19 @@ public class MapChests {
             }
         }
 
-        HungerGamesPlugin.LOG.info("Found " + chests.size() + " chests for map '" + map.getName() + "'");
+        HungerGamesPlugin.LOG.info("Found " + chests.size() + " containers for map '" + map.getName() + "'");
     }
 
     public void refillAll() {
         LootConfig loot = Configuration.getLoot();
         for (Location chestLocation : chests) {
             BlockState state = world.getBlockState(chestLocation);
-            if(state instanceof Chest chest) {
+            if(state instanceof Container container) {
                 int targetCost = HungerGamesPlugin.manager.random.nextInt(6, 25);
-                chest.getBlockInventory().clear();
-                loot.fillChest(chest, targetCost);
+                container.getInventory().clear();
+                loot.fillContainer(container, targetCost);
             } else {
-                HungerGamesPlugin.LOG.warn("Chest found at " + chestLocation + " is no longer a chest");
+                HungerGamesPlugin.LOG.warn("Container found at " + chestLocation + " is no longer a container");
             }
         }
     }

@@ -7,6 +7,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.patryk3211.hungergames.HungerGamesPlugin;
 
 import java.io.File;
@@ -27,9 +29,23 @@ public class LootConfig {
             try {
                 String itemName = (String) map.get("item");
                 int itemAmount = (int) map.get("amount");
-                ItemStack stack = new ItemStack(Material.getMaterial(itemName), itemAmount);
+                final Material mat = Material.getMaterial(itemName);
+                if(mat == null) {
+                    HungerGamesPlugin.LOG.error("Material is null, provided name: " + itemName);
+                    continue;
+                }
+                ItemStack stack = new ItemStack(mat, itemAmount);
                 int rarity = (int) map.get("rarity");
                 int cost = (int) map.get("cost");
+                if(map.containsKey("damage")) {
+                    ItemMeta meta = stack.getItemMeta();
+                    if(meta instanceof Damageable damageable) {
+                        damageable.setDamage((int) map.get("damage"));
+                        stack.setItemMeta(meta);
+                    } else {
+                        HungerGamesPlugin.LOG.warn("Item " + itemName + " is not damageable");
+                    }
+                }
 
                 ItemDef entry = new ItemDef(stack, cost);
                 for(int i = 0; i < rarity; ++i)

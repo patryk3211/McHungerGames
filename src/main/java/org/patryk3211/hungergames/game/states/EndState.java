@@ -8,6 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.patryk3211.hungergames.HungerGamesPlugin;
 import org.patryk3211.hungergames.game.GameState;
 import org.patryk3211.hungergames.game.GameStateHandler;
 import org.patryk3211.hungergames.game.PlayerStatus;
@@ -49,6 +50,10 @@ public class EndState extends GameStateHandler {
         if(tickCount % 20 == 0) {
             // Fajerwerki
             for(int i = 0; i < 5; ++i) {
+                if(winnerData.playerInstance == null) {
+                    HungerGamesPlugin.LOG.error("Winner logged off while fireworks were firing");
+                    break;
+                }
                 Location spawnLoc = winnerData.playerInstance.getLocation();
                 double angle = manager.random.nextDouble(0, Math.PI * 2);
                 double x = Math.cos(angle) * 6;

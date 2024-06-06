@@ -21,6 +21,7 @@ public class PlayingState extends GameStateHandler implements ILeaderboardProvid
     private boolean shieldActive;
     private int shieldLeft;
     private int mapShrinkDelay;
+    private int chestTicks;
 
     private int timeTicks;
     private boolean mapShrinking;
@@ -87,14 +88,24 @@ public class PlayingState extends GameStateHandler implements ILeaderboardProvid
             --mapShrinkDelay;
         }
 
+        if(!shieldActive) {
+            ++chestTicks;
+            if(chestTicks == 30*20) {
+                manager.server.sendMessage(Component.text("Skrzynki zostaną uzupełnione za 30 sekund"));
+            } else if(chestTicks == 50*20) {
+                manager.server.sendMessage(Component.text("Skrzynki zostaną uzupełnione za 10 sekund"));
+            } else if(chestTicks >= 60*20) {
+                manager.server.sendMessage(Component.text("Nowy loot pojawił się w skrzynkach"));
+                manager.getCurrentMap().getChests().refillAll();
+                chestTicks = 0;
+            }
+        }
+
         if(manager.getRemainingPlayerCount() <= 1) {
             // Został tylko jeden gracz więc gra została przez niego wygrana
             manager.nextState(GameState.End);
         }
 
-        if(timeTicks % (15 * 20) == 0) {
-            Subscriptions.notifyTime(gameTime());
-        }
         ++timeTicks;
     }
 

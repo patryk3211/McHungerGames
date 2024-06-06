@@ -3,10 +3,12 @@ package org.patryk3211.hungergames.game;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
+import org.jetbrains.annotations.Nullable;
 import org.patryk3211.hungergames.HungerGamesPlugin;
 import org.patryk3211.hungergames.http.ws.Subscriptions;
 
 public class TrackedPlayerData {
+    @Nullable
     public Player playerInstance;
     public final String name;
     private int kills;
@@ -14,7 +16,7 @@ public class TrackedPlayerData {
     private int wins;
     public Scoreboard scoreboard;
 
-    public TrackedPlayerData(Player instance, String name) {
+    public TrackedPlayerData(@Nullable Player instance, String name) {
         this.playerInstance = instance;
         this.name = name;
         this.kills = 0;

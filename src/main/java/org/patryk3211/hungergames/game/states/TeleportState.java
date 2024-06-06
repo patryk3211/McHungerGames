@@ -23,6 +23,8 @@ public class TeleportState extends GameStateHandler {
         final Iterator<Location> spawns = map.getSpawnLocations().iterator();
         while(!playerList.isEmpty()) {
             final Player player = playerList.remove(0).playerInstance;
+            if(player == null)
+                continue;
             final Location spawn = spawns.next();
             player.teleport(spawn);
             player.clearActivePotionEffects();

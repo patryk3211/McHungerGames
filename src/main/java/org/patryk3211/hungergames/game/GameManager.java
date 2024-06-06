@@ -10,9 +10,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.patryk3211.hungergames.Configuration;
 import org.patryk3211.hungergames.HungerGamesPlugin;
@@ -276,6 +274,21 @@ public class GameManager implements Listener {
         if(event.getDamager() instanceof Player && !pvpEnabled) {
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) {
+        if(event.getPlayer().isOp())
+            return;
+        event.getPlayer().sendMessage("Nie możesz używać wiadra do tej czynności");
+        event.setCancelled(true);
+    }
+    @EventHandler
+    public void onPlayerBucketFill(PlayerBucketFillEvent event) {
+        if(event.getPlayer().isOp())
+            return;
+        event.getPlayer().sendMessage("Nie możesz używać wiadra do tej czynności");
+        event.setCancelled(true);
     }
 
     @EventHandler
